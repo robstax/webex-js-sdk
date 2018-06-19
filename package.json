@@ -218,7 +218,7 @@
     "wdio-spec-reporter": "^0.1.2",
     "wdio-static-server-service": "^1.0.1",
     "wdio-webpack-service": "^1.0.1",
-    "webdriverio": "^4.10.1",
+    "webdriverio": "^4.13.0",
     "webpack": "^3.8.1",
     "webpack-dev-server": "^3.1.2",
     "webrtc-adapter": "^6.1.0",
