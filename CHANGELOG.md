@@ -2,6 +2,83 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.156.2](https://github.com/webex/webex-js-sdk/compare/v1.156.1...v1.156.2) (2022-03-15)
+
+
+### Bug Fixes
+
+* **plugins-meetings:** warn if H.264 codec is not detected ([f1e1223](https://github.com/webex/webex-js-sdk/commit/f1e1223cdf8f3fdf0adb7a1538a733dee87b7812))
+
+### [1.156.1](https://github.com/webex/webex-js-sdk/compare/v1.156.0...v1.156.1) (2022-03-15)
+
+
+### Bug Fixes
+
+* **webex-core:** send metrics when service not found in service catalog ([ac60cec](https://github.com/webex/webex-js-sdk/commit/ac60cec77a647618de8f01b5ec7d4bd2f3efe24f))
+
+## [1.156.0](https://github.com/webex/webex-js-sdk/compare/v1.155.0...v1.156.0) (2022-03-08)
+
+
+### Features
+
+* **webex-core:** add fedramp configuration for services ([ff90735](https://github.com/webex/webex-js-sdk/commit/ff907359a0620b01b7f2efcf790fde13688721e8))
+
+## [1.155.0](https://github.com/webex/webex-js-sdk/compare/v1.154.2...v1.155.0) (2022-03-07)
+
+
+### Features
+
+* **core:** check for appPlatform for spark-user-agent ([95c71b4](https://github.com/webex/webex-js-sdk/commit/95c71b4840dfb1c206640d832242a6997bffe9f7))
+
+### [1.154.2](https://github.com/webex/webex-js-sdk/compare/v1.154.1...v1.154.2) (2022-02-16)
+
+
+### Bug Fixes
+
+* **plugin-meetings:** fix extmap config boolean ([07b5e8b](https://github.com/webex/webex-js-sdk/commit/07b5e8b71db0a93a0bef0407a5a068459a83586c))
+
+### [1.154.1](https://github.com/webex/webex-js-sdk/compare/v1.154.0...v1.154.1) (2022-02-10)
+
+
+### Bug Fixes
+
+* **plugin-meetings:** remote extmap from the remotetSdp ([d64d01f](https://github.com/webex/webex-js-sdk/commit/d64d01f5efb9ee5916424e9dad01c4bd0a8945bf))
+
+## [1.154.0](https://github.com/webex/webex-js-sdk/compare/v1.153.4...v1.154.0) (2022-02-04)
+
+
+### Features
+
+* **plugin-meetings:** start sending behavioral metrics to amplitude ([f4e4181](https://github.com/webex/webex-js-sdk/commit/f4e41811ab2df17cac18ffcd83d30cef26131dca))
+
+### [1.153.4](https://github.com/webex/webex-js-sdk/compare/v1.153.3...v1.153.4) (2022-02-03)
+
+
+### Bug Fixes
+
+* **plugin-meetings:** add  permissions token for unified space meeting ([a6b04b2](https://github.com/webex/webex-js-sdk/commit/a6b04b2c5d7f79b80ac07b69a69347faf177f1a0))
+
+### [1.153.3](https://github.com/webex/webex-js-sdk/compare/v1.153.2...v1.153.3) (2022-01-26)
+
+
+### Bug Fixes
+
+* **plugin-meetings:** meeting stuck in error state ([9a03f1b](https://github.com/webex/webex-js-sdk/commit/9a03f1bf61fc69721693a3c763d1adf5f02c4c5f))
+
+### [1.153.2](https://github.com/webex/webex-js-sdk/compare/v1.153.1...v1.153.2) (2022-01-25)
+
+
+### Bug Fixes
+
+* **plugin-meetings:** use icegatheringstatechange for ice completed ([ade28cd](https://github.com/webex/webex-js-sdk/commit/ade28cd3e28d2810ebac0818bf773eae521bc56f))
+
+### [1.153.1](https://github.com/webex/webex-js-sdk/compare/v1.153.0...v1.153.1) (2022-01-20)
+
+
+### Bug Fixes
+
+* **plugin-meetings:** media not connecting on ipv6 network ([0172c9c](https://github.com/webex/webex-js-sdk/commit/0172c9c276ad9ad90949ffde7c4a6e75bfea6b2e))
+
 ## [1.153.0](https://github.com/webex/webex-js-sdk/compare/v1.152.1...v1.153.0) (2022-01-13)
 
 
