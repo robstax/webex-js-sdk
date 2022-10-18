@@ -99,7 +99,7 @@
     "fs-extra": "^8.1.0",
     "glob": "^7.1.4",
     "global": "^4.4.0",
-    "gm": "^1.23.1",
+    "gm": "^1.25.0",
     "highlight.js": "^11.0.1",
     "humanize-string": "^1.0.2",
     "in-publish": "^2.0.0",
