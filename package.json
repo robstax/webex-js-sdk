@@ -202,7 +202,7 @@
     "expect-webdriverio": "^3.3.1",
     "firefox-profile": "^4.0.0",
     "geckodriver": "^3.0.1",
-    "husky": "^7.0.4",
+    "husky": "^8.0.3",
     "intern": "^4.10.1",
     "jsdom": "19.0.0",
     "jsdom-global": "3.0.2",
