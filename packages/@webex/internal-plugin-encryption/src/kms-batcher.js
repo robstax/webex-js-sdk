@@ -80,10 +80,12 @@ const KmsBatcher = Batcher.extend({
    * @returns {Promise<Array>}
    */
   prepareRequest(queue) {
-    return this.webex.internal.encryption.kms._getKMSCluster().then((cluster) => ({
-      destination: cluster,
-      kmsMessages: queue.map((req) => req.wrapped),
-    }));
+    return this.webex.internal.encryption.kms._getKMSCluster().then((cluster) => {
+      return {
+        destination: cluster,
+        kmsMessages: queue.map((req) => req.wrapped),
+      };
+    });
   },
 
   /**

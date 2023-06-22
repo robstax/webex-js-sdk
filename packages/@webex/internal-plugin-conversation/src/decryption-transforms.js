@@ -194,7 +194,7 @@ export const transforms = toArray('inbound', {
     if (conversation.activities.items) {
       promises.push(
         Promise.all(
-          conversation.activities.items.map((item) => ctx.transform('decryptObject', null, item))
+          conversation.activities.items.map((item) => ctx.transform('decryptObject', key, item))
         )
       );
     }
@@ -244,7 +244,7 @@ export const transforms = toArray('inbound', {
       return Promise.resolve(activity);
     }
 
-    const keyUrl = activity.encryptionKeyUrl || activity.object.encryptionKeyUrl || key;
+    const keyUrl = key || activity.encryptionKeyUrl || activity.object.encryptionKeyUrl;
 
     let promises = [];
 
@@ -383,7 +383,7 @@ export const transforms = toArray('inbound', {
    */
   decryptFile(ctx, key, file) {
     // using object encryption keyUrl for images instead of activity encryptionKeyUrl
-    if (file.encryptionKeyUrl && file.encryptionKeyUrl !== key) {
+    if (!key && file.encryptionKeyUrl && file.encryptionKeyUrl !== key) {
       key = file.encryptionKeyUrl;
     }
 
