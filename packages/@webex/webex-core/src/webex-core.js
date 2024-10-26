@@ -59,7 +59,7 @@ const interceptors = {
   ServiceInterceptor: undefined,
   UserAgentInterceptor: UserAgentInterceptor.create,
   WebexUserAgentInterceptor: WebexUserAgentInterceptor.create,
-  AuthInterceptor: AuthInterceptor.create,
+  // AuthInterceptor: AuthInterceptor.create,
   KmsDryErrorInterceptor: undefined,
   PayloadTransformerInterceptor: PayloadTransformerInterceptor.create,
   ConversationInterceptor: undefined,
@@ -403,6 +403,7 @@ const WebexCore = AmpState.extend({
       .reduce(addInterceptor, ints);
     ints = postInterceptors.reduce(addInterceptor, ints);
 
+    // overload request
     this.request = requestDefaults({
       json: true,
       interceptors: ints,
