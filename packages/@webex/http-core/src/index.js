@@ -106,6 +106,7 @@ const defaultOptions = {
 
 export const defaults = protorequest;
 export const request = protorequest(defaultOptions);
+export {intercept} from './request/utils';
 export {default as ProgressEvent} from './progress-event';
 export {default as Interceptor} from './lib/interceptor';
 export {default as HttpError} from './http-error';

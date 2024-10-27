@@ -59,7 +59,7 @@ const interceptors = {
   ServiceInterceptor: undefined,
   UserAgentInterceptor: UserAgentInterceptor.create,
   WebexUserAgentInterceptor: WebexUserAgentInterceptor.create,
-  AuthInterceptor: AuthInterceptor.create,
+  // AuthInterceptor: AuthInterceptor.create,
   KmsDryErrorInterceptor: undefined,
   PayloadTransformerInterceptor: PayloadTransformerInterceptor.create,
   ConversationInterceptor: undefined,
@@ -397,16 +397,23 @@ const WebexCore = AmpState.extend({
 
     let ints = [];
 
+    const interceptorsToUse = this.config.interceptors || interceptors;
+
     ints = preInterceptors.reduce(addInterceptor, ints);
-    ints = Object.keys(interceptors)
+    ints = Object.keys(interceptorsToUse)
       .filter((key) => !(preInterceptors.includes(key) || postInterceptors.includes(key)))
       .reduce(addInterceptor, ints);
     ints = postInterceptors.reduce(addInterceptor, ints);
 
-    this.request = requestDefaults({
-      json: true,
-      interceptors: ints,
-    });
+    this.request = this.config.request
+      ? this.config.request({
+          json: true,
+          interceptors: ints,
+        })
+      : requestDefaults({
+          json: true,
+          interceptors: ints,
+        });
 
     this.prepareFetchOptions = prepareFetchOptions({
       json: true,
