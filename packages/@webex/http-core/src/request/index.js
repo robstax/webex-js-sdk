@@ -23,10 +23,15 @@ export default function request(options) {
   options.upload = new EventEmitter();
 
   return intercept(options, options.interceptors, 'Request')
-    .then((...args) => _request(options, ...args))
     .then((...args) => {
-      console.log('XD', ...args);
+      // if provided own request function, use that instead
+      if (options.request) {
+        return options.request(options, ...args);
+      }
 
+      return _request(options, ...args);
+    })
+    .then((...args) => {
       return intercept(options, options.interceptors.slice().reverse(), 'Response', ...args);
     });
 }
