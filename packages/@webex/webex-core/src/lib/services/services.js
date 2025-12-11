@@ -1,6 +1,7 @@
 import sha256 from 'crypto-js/sha256';
 
 import {union, forEach} from 'lodash';
+import {oneFlight} from '@webex/common';
 import WebexPlugin from '../webex-plugin';
 
 import METRICS from '../metrics';
@@ -1065,6 +1066,7 @@ const Services = WebexPlugin.extend({
     }
   },
 
+  @oneFlight
   /**
    * Make the initial requests to collect the root catalogs.
    *
@@ -1130,9 +1132,11 @@ const Services = WebexPlugin.extend({
         this.initServiceCatalogs()
           .then(() => {
             catalog.isReady = true;
+            this.trigger('services:catalogReady');
           })
           .catch((error) => {
             this.initFailed = true;
+            this.trigger('services:initFailed');
             this.logger.error(
               `services: failed to init initial services when credentials available, ${error?.message}`
             );
@@ -1142,6 +1146,7 @@ const Services = WebexPlugin.extend({
 
         this.collectPreauthCatalog(email ? {email} : undefined).catch((error) => {
           this.initFailed = true;
+          this.trigger('services:initFailed');
           this.logger.error(
             `services: failed to init initial services when no credentials available, ${error?.message}`
           );

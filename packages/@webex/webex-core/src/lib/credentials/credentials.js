@@ -38,6 +38,12 @@ const Credentials = WebexPlugin.extend({
         return Boolean((this.supertoken && this.supertoken.canAuthorize) || this.canRefresh);
       },
     },
+    canMakeRequests: {
+      deps: ['canAuthorize', 'servicesReady'],
+      fn() {
+        return Boolean(this.canAuthorize && this.servicesReady);
+      },
+    },
     canRefresh: {
       deps: ['supertoken', 'supertoken.canRefresh'],
       fn() {
@@ -89,6 +95,17 @@ const Credentials = WebexPlugin.extend({
      * @type {boolean}
      */
     ready: {
+      default: false,
+      type: 'boolean',
+    },
+    /**
+     * Becomes `true` once the services catalog is ready.
+     * Becomes `false` if services initialization fails.
+     * @instance
+     * @memberof Credentials
+     * @type {boolean}
+     */
+    servicesReady: {
       default: false,
       type: 'boolean',
     },
@@ -423,6 +440,18 @@ const Credentials = WebexPlugin.extend({
 
     this.webex.once('loaded', () => {
       this.ready = true;
+    });
+
+    // Listen for services initialization events after webex is ready
+    this.listenToOnce(this.webex, 'ready', () => {
+      if (this.webex.internal.services) {
+        this.listenTo(this.webex.internal.services, 'services:catalogReady', () => {
+          this.servicesReady = true;
+        });
+        this.listenTo(this.webex.internal.services, 'services:initFailed', () => {
+          this.servicesReady = false;
+        });
+      }
     });
   },
 
