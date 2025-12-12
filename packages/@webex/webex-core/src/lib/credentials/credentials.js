@@ -99,8 +99,8 @@ const Credentials = WebexPlugin.extend({
       type: 'boolean',
     },
     /**
-     * Becomes `true` once the services catalog is ready.
-     * Becomes `false` if services initialization fails.
+     * Becomes `true` once services initialization has run.
+     * Resets to `false` on logout/token invalidation.
      * @instance
      * @memberof Credentials
      * @type {boolean}
@@ -445,11 +445,8 @@ const Credentials = WebexPlugin.extend({
     // Listen for services initialization events after webex is ready
     this.listenToOnce(this.webex, 'ready', () => {
       if (this.webex.internal.services) {
-        this.listenTo(this.webex.internal.services, 'services:catalogReady', () => {
+        this.listenTo(this.webex.internal.services, 'services:initialized', () => {
           this.servicesReady = true;
-        });
-        this.listenTo(this.webex.internal.services, 'services:initFailed', () => {
-          this.servicesReady = false;
         });
       }
     });
@@ -490,6 +487,9 @@ const Credentials = WebexPlugin.extend({
     }
 
     this.logger.info('credentials: finished removing tokens');
+
+    // Reset servicesReady state on logout
+    this.servicesReady = false;
 
     // Return a promise to give the storage layer a tick or two to clear
     // localStorage
