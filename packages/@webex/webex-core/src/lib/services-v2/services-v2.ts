@@ -43,13 +43,14 @@ const Services = WebexPlugin.extend({
   session: {
     /**
      * Becomes `true` once services initialization has completed.
-     * This blocks `webex.ready` until services are initialized.
+     * When `config.services.requireServiceCatalogOnReady` is enabled, this blocks
+     * `webex.ready` until services are initialized.
      * @instance
      * @memberof Services
      * @type {boolean}
      */
     ready: {
-      default: false,
+      default: true,
       type: 'boolean',
     },
   },
@@ -1101,45 +1102,83 @@ const Services = WebexPlugin.extend({
     this._catalogs.set(this.webex, catalog);
 
     // Listen for configuration changes once.
+    // Config is not available until change:config is triggered by webex-core.
     this.listenToOnce(this.webex, 'change:config', () => {
       this.initConfig();
-    });
 
-    // wait for webex instance storage to be loaded before attempting
-    // to update the service catalogs. Using 'loaded' instead of 'ready'
-    // to avoid deadlock since webex.ready depends on this plugin's ready.
-    this.listenToOnce(this.webex, 'loaded', () => {
-      const {supertoken} = this.webex.credentials;
-      // Validate if the supertoken exists.
-      if (supertoken && supertoken.access_token) {
-        this.initServiceCatalogs()
-          .then(() => {
-            catalog.isReady = true;
-          })
-          .catch((error) => {
-            this.initFailed = true;
-            this.logger.error(
-              `services: failed to init initial services when credentials available, ${error?.message}`
-            );
-          })
-          .finally(() => {
-            this.ready = true;
-            this.trigger('services:initialized');
-          });
+      // Check if requireServiceCatalogOnReady is enabled in config.
+      // When enabled, we block webex.ready until service catalog initialization completes.
+      const requireServiceCatalogOnReady = this.config?.requireServiceCatalogOnReady;
+
+      if (requireServiceCatalogOnReady) {
+        // Set ready to false to block webex.ready
+        this.ready = false;
+
+        // Wait for storage to be loaded before attempting to update the service catalogs.
+        // We listen for 'loaded' instead of 'ready' because services.ready is a dependency
+        // of webex.ready - listening to 'ready' would cause a deadlock.
+        this.listenToOnce(this.webex, 'loaded', () => {
+          const {supertoken} = this.webex.credentials;
+          // Validate if the supertoken exists.
+          if (supertoken && supertoken.access_token) {
+            this.initServiceCatalogs()
+              .then(() => {
+                catalog.isReady = true;
+              })
+              .catch((error) => {
+                this.initFailed = true;
+                this.logger.error(
+                  `services: failed to init initial services when credentials available, ${error?.message}`
+                );
+              })
+              .finally(() => {
+                this.ready = true;
+                this.trigger('services:initialized');
+              });
+          } else {
+            const {email} = this.webex.config;
+
+            this.collectPreauthCatalog(email ? {email} : undefined)
+              .catch((error) => {
+                this.initFailed = true;
+                this.logger.error(
+                  `services: failed to init initial services when no credentials available, ${error?.message}`
+                );
+              })
+              .finally(() => {
+                this.ready = true;
+                this.trigger('services:initialized');
+              });
+          }
+        });
       } else {
-        const {email} = this.webex.config;
+        // Original behavior: wait for webex.ready before initializing service catalogs.
+        // ready defaults to true, so we don't block webex.ready.
+        this.listenToOnce(this.webex, 'ready', () => {
+          const {supertoken} = this.webex.credentials;
+          // Validate if the supertoken exists.
+          if (supertoken && supertoken.access_token) {
+            this.initServiceCatalogs()
+              .then(() => {
+                catalog.isReady = true;
+              })
+              .catch((error) => {
+                this.initFailed = true;
+                this.logger.error(
+                  `services: failed to init initial services when credentials available, ${error?.message}`
+                );
+              });
+          } else {
+            const {email} = this.webex.config;
 
-        this.collectPreauthCatalog(email ? {email} : undefined)
-          .catch((error) => {
-            this.initFailed = true;
-            this.logger.error(
-              `services: failed to init initial services when no credentials available, ${error?.message}`
-            );
-          })
-          .finally(() => {
-            this.ready = true;
-            this.trigger('services:initialized');
-          });
+            this.collectPreauthCatalog(email ? {email} : undefined).catch((error) => {
+              this.initFailed = true;
+              this.logger.error(
+                `services: failed to init initial services when no credentials available, ${error?.message}`
+              );
+            });
+          }
+        });
       }
     });
   },
