@@ -442,8 +442,9 @@ const Credentials = WebexPlugin.extend({
       this.ready = true;
     });
 
-    // Listen for services initialization events after webex is ready
-    this.listenToOnce(this.webex, 'ready', () => {
+    // Listen for services initialization events after storage is loaded.
+    // Services will emit 'services:initialized' when its init completes.
+    this.listenToOnce(this.webex, 'loaded', () => {
       if (this.webex.internal.services) {
         this.listenTo(this.webex.internal.services, 'services:initialized', () => {
           this.servicesReady = true;

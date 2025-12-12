@@ -56,6 +56,20 @@ const Services = WebexPlugin.extend({
     initFailed: ['boolean', false, false],
   },
 
+  session: {
+    /**
+     * Becomes `true` once service catalog initialization has completed.
+     * Blocks `webex.ready` until services are initialized.
+     * @instance
+     * @memberof Services
+     * @type {boolean}
+     */
+    ready: {
+      default: false,
+      type: 'boolean',
+    },
+  },
+
   _catalogs: new WeakMap(),
 
   _serviceUrls: null,
@@ -1123,9 +1137,10 @@ const Services = WebexPlugin.extend({
       this.initConfig();
     });
 
-    // wait for webex instance to be ready before attempting
-    // to update the service catalogs
-    this.listenToOnce(this.webex, 'ready', () => {
+    // Wait for storage to be loaded before attempting to update the service catalogs.
+    // We listen for 'loaded' instead of 'ready' because services.ready is a dependency
+    // of webex.ready - listening to 'ready' would cause a deadlock.
+    this.listenToOnce(this.webex, 'loaded', () => {
       const {supertoken} = this.webex.credentials;
       // Validate if the supertoken exists.
       if (supertoken && supertoken.access_token) {
@@ -1140,6 +1155,7 @@ const Services = WebexPlugin.extend({
             );
           })
           .finally(() => {
+            this.ready = true;
             this.trigger('services:initialized');
           });
       } else {
@@ -1153,6 +1169,7 @@ const Services = WebexPlugin.extend({
             );
           })
           .finally(() => {
+            this.ready = true;
             this.trigger('services:initialized');
           });
       }
