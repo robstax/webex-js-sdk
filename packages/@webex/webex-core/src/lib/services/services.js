@@ -1136,16 +1136,23 @@ const Services = WebexPlugin.extend({
             this.logger.error(
               `services: failed to init initial services when credentials available, ${error?.message}`
             );
+          })
+          .finally(() => {
+            this.trigger('services:initialized');
           });
       } else {
         const {email} = this.webex.config;
 
-        this.collectPreauthCatalog(email ? {email} : undefined).catch((error) => {
-          this.initFailed = true;
-          this.logger.error(
-            `services: failed to init initial services when no credentials available, ${error?.message}`
-          );
-        });
+        this.collectPreauthCatalog(email ? {email} : undefined)
+          .catch((error) => {
+            this.initFailed = true;
+            this.logger.error(
+              `services: failed to init initial services when no credentials available, ${error?.message}`
+            );
+          })
+          .finally(() => {
+            this.trigger('services:initialized');
+          });
       }
     });
   },
