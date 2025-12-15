@@ -34,97 +34,323 @@ describe('webex-core', () => {
     });
 
     describe('#initialize', () => {
-      it('initFailed is false when initialization succeeds and credentials are available', async () => {
-        services.listenToOnce = sinon.stub();
-        services.initServiceCatalogs = sinon.stub().returns(Promise.resolve());
-        services.webex.credentials = {
-          supertoken: {
-            access_token: 'token',
-          },
-        };
+      describe('when requireServiceCatalogOnReady is disabled (default)', () => {
+        it('initFailed is false when initialization succeeds and credentials are available', async () => {
+          let readyCallback;
 
-        services.initialize();
-
-        // call the onReady callback
-        services.listenToOnce.getCall(1).args[2]();
-        await waitForAsync();
-
-        assert.isFalse(services.initFailed);
-      });
-
-      it('initFailed is false when initialization succeeds no credentials are available', async () => {
-        services.listenToOnce = sinon.stub();
-        services.collectPreauthCatalog = sinon.stub().returns(Promise.resolve());
-
-        services.initialize();
-
-        // call the onReady callback
-        services.listenToOnce.getCall(1).args[2]();
-        await waitForAsync();
-
-        assert.isFalse(services.initFailed);
-      });
-
-      it.each([
-        {error: new Error('failed'), expectedMessage: 'failed'},
-        {error: undefined, expectedMessage: undefined},
-      ])(
-        'sets initFailed to true when collectPreauthCatalog errors',
-        async ({error, expectedMessage}) => {
-          services.collectPreauthCatalog = sinon.stub().callsFake(() => {
-            return Promise.reject(error);
+          services.listenToOnce = sinon.stub().callsFake((target, event, callback) => {
+            if (event === 'change:config') {
+              services.webex.config = {services: {}};
+              callback();
+            } else if (event === 'ready') {
+              readyCallback = callback;
+            }
           });
-
-          services.listenToOnce = sinon.stub();
-          services.logger.error = sinon.stub();
-
-          services.initialize();
-
-          // call the onReady callback
-          services.listenToOnce.getCall(1).args[2]();
-
-          await waitForAsync();
-
-          assert.isTrue(services.initFailed);
-          sinon.assert.calledWith(
-            services.logger.error,
-            `services: failed to init initial services when no credentials available, ${expectedMessage}`
-          );
-        }
-      );
-
-      it.each([
-        {error: new Error('failed'), expectedMessage: 'failed'},
-        {error: undefined, expectedMessage: undefined},
-      ])(
-        'sets initFailed to true when initServiceCatalogs errors',
-        async ({error, expectedMessage}) => {
-          services.initServiceCatalogs = sinon.stub().callsFake(() => {
-            return Promise.reject(error);
-          });
+          services.initServiceCatalogs = sinon.stub().returns(Promise.resolve());
           services.webex.credentials = {
             supertoken: {
               access_token: 'token',
             },
           };
 
-          services.listenToOnce = sinon.stub();
-          services.logger.error = sinon.stub();
+          services.initialize();
+
+          // call the onReady callback
+          readyCallback();
+          await waitForAsync();
+
+          assert.isFalse(services.initFailed);
+        });
+
+        it('initFailed is false when initialization succeeds no credentials are available', async () => {
+          let readyCallback;
+
+          services.listenToOnce = sinon.stub().callsFake((target, event, callback) => {
+            if (event === 'change:config') {
+              services.webex.config = {services: {}};
+              callback();
+            } else if (event === 'ready') {
+              readyCallback = callback;
+            }
+          });
+          services.collectPreauthCatalog = sinon.stub().returns(Promise.resolve());
 
           services.initialize();
 
           // call the onReady callback
-          services.listenToOnce.getCall(1).args[2]();
-
+          readyCallback();
           await waitForAsync();
 
+          assert.isFalse(services.initFailed);
+        });
+
+        it.each([
+          {error: new Error('failed'), expectedMessage: 'failed'},
+          {error: undefined, expectedMessage: undefined},
+        ])(
+          'sets initFailed to true when collectPreauthCatalog errors',
+          async ({error, expectedMessage}) => {
+            let readyCallback;
+
+            services.listenToOnce = sinon.stub().callsFake((target, event, callback) => {
+              if (event === 'change:config') {
+                services.webex.config = {services: {}};
+                callback();
+              } else if (event === 'ready') {
+                readyCallback = callback;
+              }
+            });
+            services.collectPreauthCatalog = sinon.stub().callsFake(() => {
+              return Promise.reject(error);
+            });
+
+            services.logger.error = sinon.stub();
+
+            services.initialize();
+
+            // call the onReady callback
+            readyCallback();
+
+            await waitForAsync();
+
+            assert.isTrue(services.initFailed);
+            sinon.assert.calledWith(
+              services.logger.error,
+              `services: failed to init initial services when no credentials available, ${expectedMessage}`
+            );
+          }
+        );
+
+        it.each([
+          {error: new Error('failed'), expectedMessage: 'failed'},
+          {error: undefined, expectedMessage: undefined},
+        ])(
+          'sets initFailed to true when initServiceCatalogs errors',
+          async ({error, expectedMessage}) => {
+            let readyCallback;
+
+            services.listenToOnce = sinon.stub().callsFake((target, event, callback) => {
+              if (event === 'change:config') {
+                services.webex.config = {services: {}};
+                callback();
+              } else if (event === 'ready') {
+                readyCallback = callback;
+              }
+            });
+            services.initServiceCatalogs = sinon.stub().callsFake(() => {
+              return Promise.reject(error);
+            });
+            services.webex.credentials = {
+              supertoken: {
+                access_token: 'token',
+              },
+            };
+
+            services.logger.error = sinon.stub();
+
+            services.initialize();
+
+            // call the onReady callback
+            readyCallback();
+
+            await waitForAsync();
+
+            assert.isTrue(services.initFailed);
+            sinon.assert.calledWith(
+              services.logger.error,
+              `services: failed to init initial services when credentials available, ${expectedMessage}`
+            );
+          }
+        );
+
+        it('ready defaults to true', () => {
+          assert.isTrue(services.ready);
+        });
+
+        it('listens for ready event when requireServiceCatalogOnReady is disabled', () => {
+          let readyListenerSet = false;
+
+          services.listenToOnce = sinon.stub().callsFake((target, event, callback) => {
+            if (event === 'change:config') {
+              services.webex.config = {services: {}};
+              callback();
+            } else if (event === 'ready') {
+              readyListenerSet = true;
+            }
+          });
+
+          services.initialize();
+
+          assert.isTrue(readyListenerSet);
+          assert.isTrue(services.ready);
+        });
+      });
+
+      describe('when requireServiceCatalogOnReady is enabled', () => {
+        it('sets ready to false and listens for loaded event', () => {
+          let loadedListenerSet = false;
+
+          services.listenToOnce = sinon.stub().callsFake((target, event, callback) => {
+            if (event === 'change:config') {
+              services.webex.config = {services: {requireServiceCatalogOnReady: true}};
+              callback();
+            } else if (event === 'loaded') {
+              loadedListenerSet = true;
+            }
+          });
+
+          services.initialize();
+
+          assert.isTrue(loadedListenerSet);
+          assert.isFalse(services.ready);
+        });
+
+        it('sets ready to true after initServiceCatalogs succeeds with credentials', async () => {
+          let loadedCallback;
+
+          services.listenToOnce = sinon.stub().callsFake((target, event, callback) => {
+            if (event === 'change:config') {
+              services.webex.config = {services: {requireServiceCatalogOnReady: true}};
+              callback();
+            } else if (event === 'loaded') {
+              loadedCallback = callback;
+            }
+          });
+          services.initServiceCatalogs = sinon.stub().returns(Promise.resolve());
+          services.webex.credentials = {
+            supertoken: {
+              access_token: 'token',
+            },
+          };
+
+          services.initialize();
+
+          assert.isFalse(services.ready);
+
+          loadedCallback();
+          await waitForAsync();
+
+          assert.isTrue(services.ready);
+          assert.isFalse(services.initFailed);
+        });
+
+        it('sets ready to true after collectPreauthCatalog succeeds without credentials', async () => {
+          let loadedCallback;
+
+          services.listenToOnce = sinon.stub().callsFake((target, event, callback) => {
+            if (event === 'change:config') {
+              services.webex.config = {services: {requireServiceCatalogOnReady: true}};
+              callback();
+            } else if (event === 'loaded') {
+              loadedCallback = callback;
+            }
+          });
+          services.collectPreauthCatalog = sinon.stub().returns(Promise.resolve());
+
+          services.initialize();
+
+          assert.isFalse(services.ready);
+
+          loadedCallback();
+          await waitForAsync();
+
+          assert.isTrue(services.ready);
+          assert.isFalse(services.initFailed);
+        });
+
+        it('sets ready to true and initFailed to true when initServiceCatalogs fails', async () => {
+          let loadedCallback;
+          const error = new Error('failed');
+
+          services.listenToOnce = sinon.stub().callsFake((target, event, callback) => {
+            if (event === 'change:config') {
+              services.webex.config = {services: {requireServiceCatalogOnReady: true}};
+              callback();
+            } else if (event === 'loaded') {
+              loadedCallback = callback;
+            }
+          });
+          services.initServiceCatalogs = sinon.stub().returns(Promise.reject(error));
+          services.webex.credentials = {
+            supertoken: {
+              access_token: 'token',
+            },
+          };
+          services.logger.error = sinon.stub();
+
+          services.initialize();
+
+          assert.isFalse(services.ready);
+
+          loadedCallback();
+          await waitForAsync();
+
+          assert.isTrue(services.ready);
           assert.isTrue(services.initFailed);
           sinon.assert.calledWith(
             services.logger.error,
-            `services: failed to init initial services when credentials available, ${expectedMessage}`
+            'services: failed to init initial services when credentials available, failed'
           );
-        }
-      );
+        });
+
+        it('sets ready to true and initFailed to true when collectPreauthCatalog fails', async () => {
+          let loadedCallback;
+          const error = new Error('failed');
+
+          services.listenToOnce = sinon.stub().callsFake((target, event, callback) => {
+            if (event === 'change:config') {
+              services.webex.config = {services: {requireServiceCatalogOnReady: true}};
+              callback();
+            } else if (event === 'loaded') {
+              loadedCallback = callback;
+            }
+          });
+          services.collectPreauthCatalog = sinon.stub().returns(Promise.reject(error));
+          services.logger.error = sinon.stub();
+
+          services.initialize();
+
+          assert.isFalse(services.ready);
+
+          loadedCallback();
+          await waitForAsync();
+
+          assert.isTrue(services.ready);
+          assert.isTrue(services.initFailed);
+          sinon.assert.calledWith(
+            services.logger.error,
+            'services: failed to init initial services when no credentials available, failed'
+          );
+        });
+
+        it('triggers services:initialized event after initialization completes', async () => {
+          let loadedCallback;
+          const triggerStub = sinon.stub();
+
+          services.listenToOnce = sinon.stub().callsFake((target, event, callback) => {
+            if (event === 'change:config') {
+              services.webex.config = {services: {requireServiceCatalogOnReady: true}};
+              callback();
+            } else if (event === 'loaded') {
+              loadedCallback = callback;
+            }
+          });
+          services.initServiceCatalogs = sinon.stub().returns(Promise.resolve());
+          services.webex.credentials = {
+            supertoken: {
+              access_token: 'token',
+            },
+          };
+          services.trigger = triggerStub;
+
+          services.initialize();
+
+          loadedCallback();
+          await waitForAsync();
+
+          sinon.assert.calledWith(triggerStub, 'services:initialized');
+        });
+      });
     });
 
     describe('#initServiceCatalogs', () => {
