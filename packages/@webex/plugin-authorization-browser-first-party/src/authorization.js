@@ -347,19 +347,26 @@ const Authorization = WebexPlugin.extend({
    * Initiates third-party (social provider) login by redirecting the user
    * to IdBroker's `/idb/ThirdPartyLogin` endpoint.
    *
-   * Mirrors `initiateLogin`'s role for the standard `/authorize` flow.
-   * Delegates to `initiateThirdPartyLoginRedirect` so any pre-redirect
-   * security plumbing (CSRF / `state`) can be added here without changing
-   * the navigation method.
+   * Mirrors `initiateLogin`'s role for the standard `/authorize` flow:
+   * generates a CSRF token and embeds it in `options.state.csrf_token`,
+   * then delegates to `initiateThirdPartyLoginRedirect` for the actual
+   * navigation step.
    *
    * @instance
    * @memberof AuthorizationBrowserFirstParty
    * @param {Object} options
    * @param {string} options.oauth2provider
    * @param {string} options.returnURL
+   * @param {Object} [options.state] - Caller-supplied state object. Merged
+   *   with the generated `csrf_token` and round-tripped through IdBroker
+   *   (requires IdBroker §13.2.2 to echo `state`).
    * @returns {Promise<void>}
    */
   initiateThirdPartyLogin(options = {}) {
+    options = cloneDeep(options);
+    options.state = options.state || {};
+    options.state.csrf_token = this._generateSecurityToken();
+
     return this.initiateThirdPartyLoginRedirect(options);
   },
 
@@ -391,6 +398,74 @@ const Authorization = WebexPlugin.extend({
     }
 
     return Promise.resolve();
+  },
+
+  /**
+   * Handles the third-party (social provider) login callback. Parses the
+   * window's current query string, validates the CSRF token round-tripped
+   * via `state.csrf_token`, scrubs sensitive parameters from the URL, and
+   * returns the parsed payload.
+   *
+   * IdBroker §13.2.2 must echo the `state` query param back unchanged for
+   * CSRF validation to succeed.
+   *
+   * Mirrors the callback half of `initialize()` for the first-party
+   * `/authorize` flow, scoped to the third-party redirect shape.
+   *
+   * @instance
+   * @memberof AuthorizationBrowserFirstParty
+   * IdBroker emits the following query parameters on the callback (see
+   * `ThirdPartyLoginServlet.java` in `CommonIdentity/identity-broker`):
+   * `id_token`, `email`, `error`, `state`. There is no `errorCode`. Values
+   * for `error` come from `OAuth2Constants.SocialLoginError` (e.g.
+   * `FailedToCallOAuthProvider`, `FailedToGetUserProfile`) and map 1:1 to
+   * the web-client's `src/constants/Auth.js` strings.
+   *
+   * `id_token` and `email` are scrubbed from the URL via `_cleanUrl`; the
+   * `error` value is left intact for consistency with the `/authorize`
+   * flow (OAuth-spec error strings are non-sensitive enums).
+   *
+   * @instance
+   * @memberof AuthorizationBrowserFirstParty
+   * @param {string} [search] - Optional query string (defaults to the
+   *   window's current `location.search`). Leading `?` is tolerated.
+   * @returns {Promise<{idToken: string|undefined, email: string|undefined,
+   *   error: string|undefined, state: Object}>}
+   */
+  handleThirdPartyCallback(search) {
+    return new Promise((resolve) => {
+      const win = this.webex.getWindow();
+      const rawSearch =
+        typeof search === 'string' ? search : (win.location && win.location.search) || '';
+      const query = querystring.parse(rawSearch.replace(/^\?/, ''));
+
+      let parsedState = {};
+      if (query.state) {
+        try {
+          parsedState = JSON.parse(base64.decode(query.state));
+        } catch (err) {
+          throw new Error('Unable to decode third-party callback state');
+        }
+        query.state = parsedState;
+      }
+
+      this._verifySecurityToken(query, {requireMatch: true});
+
+      const location = url.parse(win.location.href, true);
+      // Replace freshly-parsed state with already-decoded version so
+      // _cleanUrl re-encodes correctly without csrf_token.
+      location.query.state = parsedState;
+      this._cleanUrl(location, ['id_token', 'email']);
+
+      const {csrf_token, ...stateWithoutCsrf} = parsedState;
+
+      resolve({
+        idToken: query.id_token,
+        email: query.email,
+        error: query.error,
+        state: stateWithoutCsrf,
+      });
+    });
   },
 
   /**
@@ -755,6 +830,9 @@ const Authorization = WebexPlugin.extend({
    *
    * Approach:
    * - Remove 'code'.
+   * - Remove any additional top-level query keys named in `extraQueryKeys`
+   *   (e.g. `idToken`, `email`, `error`, `errorCode` for the third-party
+   *   callback flow).
    * - Remove 'state' entirely if only contained csrf_token.
    * - Else, re-encode remaining state fields (minus csrf_token).
    * - Replace current history entry (no page reload).
@@ -762,13 +840,16 @@ const Authorization = WebexPlugin.extend({
    * @instance
    * @memberof AuthorizationBrowserFirstParty
    * @param {Object} location
+   * @param {string[]} [extraQueryKeys=[]] - Additional top-level query
+   *   keys to scrub.
    * @private
    * @returns {void}
    */
-  _cleanUrl(location) {
+  _cleanUrl(location, extraQueryKeys = []) {
     location = cloneDeep(location);
     if (this.webex.getWindow().history && this.webex.getWindow().history.replaceState) {
       Reflect.deleteProperty(location.query, 'code');
+      extraQueryKeys.forEach((key) => Reflect.deleteProperty(location.query, key));
       if (isEmpty(omit(location.query.state, 'csrf_token'))) {
         Reflect.deleteProperty(location.query, 'state');
       } else {
@@ -843,19 +924,29 @@ const Authorization = WebexPlugin.extend({
    * - Ensure state + state.csrf_token exist.
    * - Compare values; throw descriptive errors on mismatch / absence.
    *
-   * If no stored token (e.g., user navigated directly), silently returns.
+   * If no stored token (e.g., user navigated directly), silently returns
+   * unless `options.requireMatch` is `true`, in which case absence of a
+   * stored token is itself treated as a CSRF failure.
    *
    * @instance
    * @memberof AuthorizationBrowserFirstParty
    * @param {Object} query - Parsed query (location.query)
+   * @param {Object} [options]
+   * @param {boolean} [options.requireMatch=false] - When true, throws if
+   *   no stored sessionToken is present (used by third-party callback
+   *   where direct navigation should never occur).
    * @private
    * @returns {void}
    */
-  _verifySecurityToken(query) {
+  _verifySecurityToken(query, options = {}) {
     const sessionToken = this.webex.getWindow().sessionStorage.getItem(OAUTH2_CSRF_TOKEN);
 
     this.webex.getWindow().sessionStorage.removeItem(OAUTH2_CSRF_TOKEN);
     if (!sessionToken) {
+      if (options.requireMatch) {
+        throw new Error('CSRF token missing from session storage');
+      }
+
       return;
     }
 
