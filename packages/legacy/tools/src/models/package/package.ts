@@ -9,7 +9,7 @@ import CONSTANTS from './package.constants';
 import type { BuildConfig, Data, TestConfig } from './package.types';
 
 /**
- * The Package class, which represents an entire local JavaScript package.
+ * The Package class, which represents an entire local JavaScript package
  *
  * @remarks
  * This class is used to manage any action against a specific package.
@@ -82,9 +82,15 @@ class Package {
         return Promise.all(files.map((file) => file.build({
           destination,
           generateSourceMap: !!generateSourceMaps,
-        })));
+        }))).then(() => files.length);
       })
-      .then(() => this);
+      .then((fileCount) => {
+        const packageName = path.basename(this.data.packageRoot);
+
+        console.log(`Built ${packageName}: ${fileCount} files → ${destination}`);
+
+        return this;
+      });
   }
 
   /**

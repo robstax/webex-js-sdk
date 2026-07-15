@@ -142,9 +142,7 @@ describe('plugin-metrics', () => {
           webex.internal.newMetrics.callDiagnosticLatencies.getDiffBetweenTimestamps = sinon
             .stub()
             .returns(10);
-          webex.internal.newMetrics.callDiagnosticLatencies.getU2CTime = sinon
-            .stub()
-            .returns(20);
+          webex.internal.newMetrics.callDiagnosticLatencies.getU2CTime = sinon.stub().returns(20);
           webex.internal.newMetrics.callDiagnosticLatencies.getReachabilityClustersReqResp = sinon
             .stub()
             .returns(10);
@@ -165,7 +163,7 @@ describe('plugin-metrics', () => {
               registerWDMDeviceJMT: 10,
               showInterstitialTime: 10,
               getU2CTime: 20,
-              getReachabilityClustersReqResp: 10
+              getReachabilityClustersReqResp: 10,
             },
           });
           assert.lengthOf(
@@ -189,12 +187,17 @@ describe('plugin-metrics', () => {
           webex.internal.newMetrics.callDiagnosticLatencies.getDownloadTimeJMT = sinon
             .stub()
             .returns(100);
-          webex.internal.newMetrics.callDiagnosticLatencies.getClickToInterstitialWithUserDelay = sinon
-            .stub()
-            .returns(43);
+          webex.internal.newMetrics.callDiagnosticLatencies.getClickToInterstitialWithUserDelay =
+            sinon.stub().returns(43);
           webex.internal.newMetrics.callDiagnosticLatencies.getTotalJMTWithUserDelay = sinon
             .stub()
             .returns(64);
+          webex.internal.newMetrics.callDiagnosticLatencies.getInterstitialToJoinOK = sinon
+            .stub()
+            .returns(10);
+          webex.internal.newMetrics.callDiagnosticLatencies.getTotalJMT = sinon
+            .stub()
+            .returns(20);
           const promise = webex.internal.newMetrics.callDiagnosticMetrics.submitToCallDiagnostics(
             //@ts-ignore
             {event: {name: 'client.locus.join.response'}}
@@ -346,9 +349,15 @@ describe('plugin-metrics', () => {
           webex.internal.newMetrics.callDiagnosticLatencies.getInterstitialToJoinOK = sinon
             .stub()
             .returns(7);
-            webex.internal.newMetrics.callDiagnosticLatencies.getStayLobbyTime = sinon
+          webex.internal.newMetrics.callDiagnosticLatencies.getStayLobbyTime = sinon
             .stub()
             .returns(1);
+          webex.internal.newMetrics.callDiagnosticLatencies.getStayLobbyTimeCappedBy = sinon
+            .stub()
+            .returns(1);
+          webex.internal.newMetrics.callDiagnosticLatencies.getTotalMediaJMT = sinon
+            .stub()
+            .returns(44);
           webex.internal.newMetrics.callDiagnosticLatencies.getTotalMediaJMTWithUserDelay = sinon
             .stub()
             .returns(43);
@@ -369,12 +378,39 @@ describe('plugin-metrics', () => {
           assert.deepEqual(webex.request.getCalls()[0].args[0].body.metrics[0].eventPayload.event, {
             name: 'client.media-engine.ready',
             joinTimes: {
-              totalMediaJMT: 61,
+              totalMediaJMT: 44,
               interstitialToMediaOKJMT: 22,
-              callInitMediaEngineReady: 10,
-              stayLobbyTime: 1,
+              callInitMediaEngineReady: 22,
               totalMediaJMTWithUserDelay: 43,
               totalJMTWithUserDelay: 64,
+            },
+          });
+          assert.lengthOf(
+            webex.internal.newMetrics.callDiagnosticMetrics.callDiagnosticEventsBatcher.queue,
+            0
+          );
+        });
+
+        it('appends the correct join times to the request for client.lobby.exited', async () => {
+          webex.internal.newMetrics.callDiagnosticLatencies.getStayLobbyTime = sinon
+            .stub()
+            .returns(10);
+
+          const promise = webex.internal.newMetrics.callDiagnosticMetrics.submitToCallDiagnostics(
+            //@ts-ignore
+            {event: {name: 'client.lobby.exited'}}
+          );
+          await flushPromises();
+          clock.tick(config.metrics.batcherWait);
+
+          await promise;
+
+          //@ts-ignore
+          assert.calledOnce(webex.request);
+          assert.deepEqual(webex.request.getCalls()[0].args[0].body.metrics[0].eventPayload.event, {
+            name: 'client.lobby.exited',
+            joinTimes: {
+              stayLobbyTime: 10,
             },
           });
           assert.lengthOf(
@@ -478,6 +514,142 @@ describe('plugin-metrics', () => {
           },
         });
         assert.deepEqual(prepareDiagnosticMetricItemCalls[0].args[1].type, ['diagnostic-event']);
+      });
+    });
+
+    describe('#submitHttpRequest', () => {
+      it('calls handleHttpResponseStatus with response status on success', async () => {
+        const payload = [
+          {
+            eventPayload: {event: 'my.event'},
+            type: ['diagnostic-event'],
+          },
+        ];
+
+        webex.request = sinon.stub().resolves({statusCode: 200});
+
+        const handleHttpResponseStatusSpy = sinon.spy(
+          webex.internal.newMetrics.callDiagnosticMetrics.callDiagnosticEventsBatcher,
+          'handleHttpResponseStatus'
+        );
+
+        const promise =
+          webex.internal.newMetrics.callDiagnosticMetrics.callDiagnosticEventsBatcher.submitHttpRequest(
+            payload
+          );
+
+        assert.deepEqual(handleHttpResponseStatusSpy.getCalls().length, 0);
+
+        await flushPromises();
+        clock.tick(config.metrics.batcherWait);
+
+        await promise;
+
+        assert.calledOnce(webex.request);
+        assert.deepEqual(handleHttpResponseStatusSpy.getCalls().length, 1);
+        assert.deepEqual(handleHttpResponseStatusSpy.args[0][0], 200);
+        assert.deepEqual(handleHttpResponseStatusSpy.args[0][1], payload);
+      });
+
+      it('calls handleHttpResponseStatus with error status on failure', async () => {
+        const payload = [
+          {
+            eventPayload: {event: 'my.event'},
+            type: ['diagnostic-event'],
+          },
+        ];
+
+        webex.request = sinon.stub().rejects({statusCode: 503});
+
+        const handleHttpResponseStatusSpy = sinon.spy(
+          webex.internal.newMetrics.callDiagnosticMetrics.callDiagnosticEventsBatcher,
+          'handleHttpResponseStatus'
+        );
+
+        const promise =
+          webex.internal.newMetrics.callDiagnosticMetrics.callDiagnosticEventsBatcher.submitHttpRequest(
+            payload
+          );
+
+        assert.deepEqual(handleHttpResponseStatusSpy.getCalls().length, 0);
+
+        await flushPromises();
+        clock.tick(config.metrics.batcherWait);
+
+        let error: any;
+
+        try {
+          await promise;
+        } catch (err) {
+          error = err;
+        }
+
+        assert.deepEqual(error.statusCode, 503);
+        assert.calledOnce(webex.request);
+        assert.deepEqual(handleHttpResponseStatusSpy.getCalls().length, 1);
+        assert.deepEqual(handleHttpResponseStatusSpy.args[0][0], 503);
+        assert.deepEqual(handleHttpResponseStatusSpy.args[0][1], payload);
+      });
+    });
+
+    describe('#handleHttpResponseStatus', () => {
+      let setIsTelemetryOptOutAutomaticStub;
+
+      beforeEach(() => {
+        setIsTelemetryOptOutAutomaticStub = sinon.stub(
+          webex.internal.newMetrics.callDiagnosticMetrics,
+          'setIsTelemetryOptOutAutomatic'
+        );
+      });
+
+      [201, 400, 503, undefined].forEach((statusCode) => {
+        it(`does not call setIsTelemetryOptOutAutomatic() when statusCode is ${statusCode} and markTelemetryOptOutOnResponse is true`, () => {
+          webex.internal.newMetrics.callDiagnosticMetrics.callDiagnosticEventsBatcher.handleHttpResponseStatus(
+            statusCode,
+            [{markTelemetryOptOutOnResponse: true}]
+          );
+
+          assert.notCalled(setIsTelemetryOptOutAutomaticStub);
+        });
+      });
+
+      it('calls setIsTelemetryOptOutAutomatic(true) when statusCode is 200 and markTelemetryOptOutOnResponse is true', () => {
+        webex.internal.newMetrics.callDiagnosticMetrics.callDiagnosticEventsBatcher.handleHttpResponseStatus(
+          200,
+          [{markTelemetryOptOutOnResponse: true}]
+        );
+
+        assert.calledOnce(setIsTelemetryOptOutAutomaticStub);
+        assert.calledWithExactly(setIsTelemetryOptOutAutomaticStub, true);
+      });
+
+      [200, 201, 400, 503, undefined].forEach((statusCode) => {
+        it(`does not call setIsTelemetryOptOutAutomatic when shouldMark is false (statusCode: ${statusCode})`, () => {
+          webex.internal.newMetrics.callDiagnosticMetrics.callDiagnosticEventsBatcher.handleHttpResponseStatus(
+            statusCode,
+            [{markTelemetryOptOutOnResponse: false}]
+          );
+
+          assert.notCalled(setIsTelemetryOptOutAutomaticStub);
+        });
+      });
+
+      it('does not call setIsTelemetryOptOutAutomatic when payload is empty', () => {
+        webex.internal.newMetrics.callDiagnosticMetrics.callDiagnosticEventsBatcher.handleHttpResponseStatus(
+          200,
+          []
+        );
+
+        assert.notCalled(setIsTelemetryOptOutAutomaticStub);
+      });
+
+      it('does not call setIsTelemetryOptOutAutomatic when payload is not an array', () => {
+        webex.internal.newMetrics.callDiagnosticMetrics.callDiagnosticEventsBatcher.handleHttpResponseStatus(
+          200,
+          null
+        );
+
+        assert.notCalled(setIsTelemetryOptOutAutomaticStub);
       });
     });
   });

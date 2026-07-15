@@ -14,6 +14,8 @@ import {
   TenantData,
   URLMapping,
   WRAP_UP_CODE,
+  AIFeatureFlagsResponse,
+  AIFeatureFlags,
 } from './types';
 
 /**
@@ -140,6 +142,7 @@ function parseAgentConfigs(profileData: {
   dialPlanData: DialPlanEntity[];
   urlMapping: URLMapping[];
   multimediaProfileId: string;
+  aiFeatureFlags: AIFeatureFlagsResponse;
 }): Profile {
   const {
     userData,
@@ -151,6 +154,7 @@ function parseAgentConfigs(profileData: {
     agentProfileData,
     dialPlanData,
     urlMapping,
+    aiFeatureFlags,
   } = profileData;
 
   const tenantDataTimeout = tenantData.timeoutDesktopInactivityEnabled
@@ -180,10 +184,12 @@ function parseAgentConfigs(profileData: {
   }); // pushing available state to idle codes
 
   const defaultWrapUpData = getDefaultWrapUpCode(wrapupCodes);
+  const aiFeature: AIFeatureFlags | undefined =
+    aiFeatureFlags?.data?.length > 0 ? aiFeatureFlags.data[0] : undefined;
 
   const finalData = {
     teams: teamData,
-    defaultDn: userData.defaultDialledNumber,
+    defaultDn: userData.deafultDialledNumber,
     forceDefaultDn: tenantData.forceDefaultDn,
     forceDefaultDnForAgent: getDefaultAgentDN(agentProfileData.agentDNValidation),
     regexUS: tenantData.dnDefaultRegex,
@@ -204,6 +210,7 @@ function parseAgentConfigs(profileData: {
     siteId: userData.siteId,
     enterpriseId: orgInfoData.tenantId,
     tenantTimezone: orgInfoData.timezone,
+    environment: orgInfoData.environment,
     privacyShieldVisible: tenantData.privacyShieldVisible,
     organizationIdleCodes: [], // TODO: for supervisor, getOrgFilteredIdleCodes(auxCodes, false),
     idleCodesAccess: agentProfileData.accessIdleCode as 'ALL' | 'SPECIFIC',
@@ -226,7 +233,7 @@ function parseAgentConfigs(profileData: {
     isAgentAvailableAfterOutdial: agentProfileData.agentAvailableAfterOutdial,
     outDialEp: agentProfileData.outdialEntryPointId,
     isCampaignManagementEnabled: orgSettingsData.campaignManagerEnabled,
-    isEndCallEnabled: tenantData.endCallEnabled,
+    isEndTaskEnabled: tenantData.endCallEnabled,
     isEndConsultEnabled: tenantData.endConsultEnabled,
     callVariablesSuppressed: tenantData.callVariablesSuppressed,
     agentDbId: userData.dbId,
@@ -253,6 +260,7 @@ function parseAgentConfigs(profileData: {
     webexConfig: getWebexConfig(agentProfileData),
     lostConnectionRecoveryTimeout:
       tenantData.lostConnectionRecoveryTimeout || LOST_CONNECTION_RECOVERY_TIMEOUT,
+    aiFeature,
   };
 
   return finalData;

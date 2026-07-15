@@ -17,6 +17,7 @@ let callingClient;
 let correlationId;
 let callHistory;
 let voicemail;
+let callRecording;
 let contacts;
 let callSettings;
 let line;
@@ -64,6 +65,10 @@ const transferTarget = document.getElementById('transfer_target');
 const holdResumeElm = document.getElementById('hold_button');
 const callHistoryElm = document.querySelector('#Call-history');
 const voicemailElm = document.querySelector('#Voice-mail');
+const callRecordingElm = document.querySelector('#Call-recording');
+const recordingDataElm = document.querySelector('#recording-data');
+const recordingSessionDataElm = document.querySelector('#recording-session-data');
+const recordingEventsElm = document.querySelector('#recording-events');
 const registrationForm = document.querySelector('#auth-registration');
 const serviceIndicator = document.querySelector('#ServiceIndicator');
 const serviceDomain = document.querySelector('#ServiceDomain');
@@ -90,6 +95,10 @@ const makeCallBtn = document.querySelector('#create-call-action');
 const muteElm = document.getElementById('mute_button');
 const bnrButton = document.getElementById('bnr-button');
 const uploadLogsResultElm = document.getElementById('upload-logs-result');
+const devicesUserIdInput = document.getElementById('devices-user-id');
+const fetchDevicesButton = document.getElementById('fetch-devices');
+const devicesHeader = document.getElementById('devicesHeaderId');
+const devicesTableBody = document.getElementById('devicesTableBody');
 
 let base64;
 let audio64;
@@ -166,6 +175,17 @@ if (localStorage.getItem('date') > new Date().getTime()) {
   localStorage.removeItem('access-token');
 }
 
+// Initialize Mobius WSS dropdown from localStorage
+const mobiusWssCheckbox = document.getElementById('mobius-wss');
+const storedMobiusWss = localStorage.getItem('mobius-wss-enabled');
+if (storedMobiusWss === 'true') {
+  mobiusWssCheckbox.value = 'true';
+} else if (storedMobiusWss === 'false') {
+  mobiusWssCheckbox.value = 'false';
+} else {
+  mobiusWssCheckbox.value = 'default';
+}
+
 tokenElm.addEventListener('change', (event) => {
   localStorage.setItem('access-token', event.target.value);
   localStorage.setItem('date', new Date().getTime() + 12 * 60 * 60 * 1000);
@@ -174,6 +194,20 @@ tokenElm.addEventListener('change', (event) => {
 function changeEnv() {
   enableProd = !enableProd;
   enableProduction.innerHTML = enableProd ? 'In Production' : 'In Integration';
+}
+
+function toggleMobiusWss() {
+  const value = mobiusWssCheckbox.value;
+  if (value === 'true') {
+    localStorage.setItem('mobius-wss-enabled', 'true');
+    console.log('Mobius WebSocket force-enabled via samples page');
+  } else if (value === 'false') {
+    localStorage.setItem('mobius-wss-enabled', 'false');
+    console.log('Mobius WebSocket force-disabled via samples page');
+  } else {
+    localStorage.removeItem('mobius-wss-enabled');
+    console.log('Mobius WebSocket using backend flag (override cleared)');
+  }
 }
 
 // Guest access token via Service App - Logic deployed on the AWS Lambda
@@ -269,6 +303,7 @@ async function initCalling(e) {
     callHistory: true,
     callSettings: true,
     voicemail: true,
+    callRecording: true,
   }
 
   const loggerConfig = {
@@ -321,9 +356,11 @@ async function initCalling(e) {
     console.log('Authentication :: Calling Ready');
     callHistoryElm.disabled = false;
     voicemailElm.disabled = false;
+    callRecordingElm.disabled = false;
     authStatusElm.innerText = 'Saved access token!';
     callHistoryElm.classList.add('btn--green');
     voicemailElm.classList.add('btn--green');
+    callRecordingElm.classList.add('btn--green');
     dndButton.classList.add('btn--red');
     dndButton.innerHTML = 'Fetching DND Status';
     dndButton.disabled = true;
@@ -337,8 +374,9 @@ async function initCalling(e) {
       registerElm.disabled = false;
 
       if(window.callingClient === undefined && calling.callingClient !== undefined) {
-      callingClient = window.callingClient = calling.callingClient;
-    }
+        callingClient = window.callingClient = calling.callingClient;
+        monitorMobiusSocket();
+      }
 
       if (window.contacts === undefined) {
         contacts = window.contacts = calling.contactClient;
@@ -354,6 +392,11 @@ async function initCalling(e) {
 
       if (window.voicemail === undefined) {
         voicemail = window.voicemail = calling.voicemailClient;
+      }
+
+      if (window.callRecording === undefined && calling.callRecordingClient !== undefined) {
+        callRecording = window.callRecording = calling.callRecordingClient;
+        registerCallRecordingListeners();
       }
 
       if(callingClient) fetchLines();
@@ -404,6 +447,24 @@ function userSession() {
     console.log('Users recent session data : ', sessionData.data.userSessions.userSessions[0]);
     userSessionData.innerText = `${JSON.stringify(sessionData.data.userSessions.userSessions[0])}`;
   });
+}
+
+function monitorMobiusSocket() {
+  if (!callingClient) return;
+
+  callingClient.on('callingClient:mobius_socket_connected', () => {
+    console.log('Mobius socket connected');
+  });
+
+  callingClient.on('callingClient:mobius_socket_disconnected', (event) => {
+    console.log('Mobius socket disconnected, reason: ', event.reason);
+  });
+
+  // The connected event is emitted during client init, before this listener is
+  // attached, so reconcile the current state to avoid missing the initial connection.
+  if (callingClient.isMobiusSocketConnected()) {
+    console.log('Mobius socket connected');
+  }
 }
 
 function createDevice() {
@@ -693,6 +754,57 @@ async function getCallQuality() {
   }
 }
 
+function renderDevicesTable(devices = []) {
+  if (!devicesHeader || !devicesTableBody) {
+    return;
+  }
+
+  devicesHeader.innerHTML = `
+    <tr>
+      <th>#</th>
+      <th>Device ID</th>
+      <th>Status</th>
+      <th>Last Seen</th>
+      <th>URI</th>
+      <th>Client Device URI</th>
+    </tr>
+  `;
+
+  devicesTableBody.innerHTML = devices
+    .map(
+      (device, index) => `
+        <tr>
+          <td>${index + 1}</td>
+          <td>${device.deviceId}</td>
+          <td>${device.status}</td>
+          <td>${device.lastSeen}</td>
+          <td>${device.uri}</td>
+          <td>${device.clientDeviceUri || ''}</td>
+        </tr>`
+    )
+    .join('');
+}
+
+async function fetchDevicesList() {
+  if (!callingClient) {
+    console.error('Calling client not initialized');
+    return;
+  }
+
+  const enteredUserId = devicesUserIdInput?.value?.trim();
+  const userId = enteredUserId;
+
+  try {
+    const devices = await callingClient.getDevices();
+    renderDevicesTable(devices);
+  } catch (error) {
+    console.error('Failed to fetch devices', error);
+    if (devicesTableBody) {
+      devicesTableBody.innerHTML = `<tr><td colspan="7">Failed to fetch devices</td></tr>`;
+    }
+  }
+}
+
 function commitTransfer() {
 
   const digit = transferTarget.value;
@@ -757,7 +869,7 @@ async function getMediaStreams() {
 }
 
 async function toggleNoiseReductionEffect() {
-  const options =  {authToken: tokenElm.value, env: enableProd ? 'prod': 'int'}
+  const options = {authToken: tokenElm.value, env: enableProd ? 'prod': 'int'};
   effect = await localAudioStream.getEffectByKind('noise-reduction-effect');
 
   if (!effect) {
@@ -777,6 +889,10 @@ async function toggleNoiseReductionEffect() {
 
 // Listen for submit on create meeting
 createCallForm.addEventListener('submit', createCall);
+
+if (fetchDevicesButton) {
+  fetchDevicesButton.addEventListener('click', fetchDevicesList);
+}
 
 function addPlayIfPausedEvents(mediaElements) {
   mediaElements.forEach((elem) => {
@@ -868,7 +984,7 @@ function answer() {
 function renderContacts(contacts, groupIdDisplayNameMap) {
   contactsTable.innerHTML = contacts.reduce((acc, contact,i) => {
     const parentGroups = [];
-    contact.groups.forEach(groupId => parentGroups.push(groupIdDisplayNameMap[groupId]));
+    contact.groups?.forEach(groupId => parentGroups.push(groupIdDisplayNameMap[groupId]));
 
     const phoneNumbers = contact.phoneNumbers?.reduce((acc, currValue)=> acc + `<p>${currValue.type}:${currValue.value}</p>`, '');
     return acc +
@@ -975,6 +1091,158 @@ async function createCallHistory() {
     console.log(`Call history error response ${err}`);
 
     return err;
+  }
+}
+
+/**
+ * Render the list of recordings into the Call Recording table.
+ *
+ * @param {Array} recordings - Array of recording objects.
+ */
+function renderRecordingsTable(recordings) {
+  const recordingTable = document.getElementById('callRecordingTableId');
+  const recordingHeader = document.getElementById('callRecordingHeaderId');
+
+  recordingHeader.innerHTML = `<tr>
+    <th>#</th>
+    <th>Recording Id</th>
+    <th>Topic</th>
+    <th>Status</th>
+    <th>Call Session ID</th>
+    <th>Service Type</th>
+    <th>Created</th>
+    <th>Duration (s)</th>
+  </tr>`;
+  recordingTable.innerHTML = '';
+
+  (recordings || []).forEach((recording, index) => {
+    recordingTable.innerHTML += `<tr>
+      <td>${index + 1}</td>
+      <td>${recording.id ?? 'NA'}</td>
+      <td>${recording.topic ?? 'NA'}</td>
+      <td>${recording.status ?? 'NA'}</td>
+      <td>${recording.serviceData?.callSessionId ?? 'NA'}</td>
+      <td>${recording.serviceType ?? 'NA'}</td>
+      <td>${recording.createTime ?? 'NA'}</td>
+      <td>${recording.durationSeconds ?? 'NA'}</td>
+    </tr>`;
+  });
+}
+
+/**
+ * Subscribe to typed Call Recording events and log them in the events panel.
+ */
+function registerCallRecordingListeners() {
+  if (!callRecording) {
+    return;
+  }
+
+  const logEvent = (label) => (event) => {
+    console.log(`Call Recording event :: ${label}`, event);
+    recordingEventsElm.innerText = `${label}: ${JSON.stringify(event, null, 2)}\n${recordingEventsElm.innerText}`;
+  };
+
+  callRecording.on('callRecording:created', logEvent('callRecording:created'));
+  callRecording.on('callRecording:updated', logEvent('callRecording:updated'));
+  callRecording.on('callRecording:deleted', logEvent('callRecording:deleted'));
+}
+
+/**
+ * Fetch the list of recordings for the logged-in user.
+ */
+async function fetchRecordings() {
+  try {
+    callRecordingElm.disabled = true;
+    const response = await callRecording.getCallRecording({type: 'list'});
+
+    console.log('Call Recording list response ', response);
+    renderRecordingsTable(response.data?.recordings);
+  } catch (err) {
+    console.log(`Call Recording list error response ${err}`);
+  } finally {
+    callRecordingElm.disabled = false;
+  }
+}
+
+/**
+ * Fetch a single recording by its UUID.
+ */
+async function fetchRecording() {
+  const recordingId = document.getElementById('recordingId').value;
+
+  try {
+    const response = await callRecording.getCallRecording({type: 'detail', recordingId});
+
+    console.log('Call Recording get response ', response);
+    recordingDataElm.innerText = JSON.stringify(response.data?.recording ?? response.data, null, 2);
+  } catch (err) {
+    console.log(`Call Recording get error response ${err}`);
+    recordingDataElm.innerText = `${err}`;
+  }
+}
+
+/**
+ * Fetch metadata for a single recording by its UUID.
+ */
+async function fetchRecordingMetadata() {
+  const recordingId = document.getElementById('recordingId').value;
+
+  try {
+    const response = await callRecording.getCallRecording({type: 'metadata', recordingId});
+
+    console.log('Call Recording metadata response ', response);
+    recordingDataElm.innerText = JSON.stringify(response.data?.metadata ?? response.data, null, 2);
+  } catch (err) {
+    console.log(`Call Recording metadata error response ${err}`);
+    recordingDataElm.innerText = `${err}`;
+  }
+}
+
+/**
+ * Permanently delete a single recording by its id. Per the API this cannot be undone.
+ */
+async function removeRecording() {
+  const recordingId = document.getElementById('recordingId').value;
+
+  if (!recordingId) {
+    recordingDataElm.innerText = 'Please enter a recording id to delete.';
+
+    return;
+  }
+
+  // eslint-disable-next-line no-alert
+  if (!window.confirm(`Permanently delete recording ${recordingId}? This cannot be undone.`)) {
+    return;
+  }
+
+  try {
+    const response = await callRecording.deleteRecording(recordingId);
+
+    console.log('Call Recording delete response ', response);
+    recordingDataElm.innerText = JSON.stringify(response, null, 2);
+
+    // Refresh the list so the deleted recording drops out of the table.
+    await fetchRecordings();
+  } catch (err) {
+    console.log(`Call Recording delete error response ${err}`);
+    recordingDataElm.innerText = `${err}`;
+  }
+}
+
+/**
+ * Fetch all recordings that belong to a given call session id.
+ */
+async function fetchRecordingsBySession() {
+  const callSessionId = document.getElementById('callSessionId').value;
+
+  try {
+    const response = await callRecording.getCallRecording({type: 'byCallSession', callSessionId});
+
+    console.log('Call Recording by session response ', response);
+    recordingSessionDataElm.innerText = JSON.stringify(response.data, null, 2);
+  } catch (err) {
+    console.log(`Call Recording by session error response ${err}`);
+    recordingSessionDataElm.innerText = `${err}`;
   }
 }
 
@@ -1188,7 +1456,7 @@ async function createVoiceMail() {
         }
       } else {
         console.log('Voicemail is empty');
-      } 
+      }
 
       voicemailElm.disabled = false;
 

@@ -66,7 +66,6 @@ describe('AgentConfigService', () => {
         method: 'GET',
       });
       expect(result).toEqual(mockResponse.body);
-
       expect(LoggerProxy.info).toHaveBeenCalledWith('Fetching user data using CI', {
         module: CONFIG_FILE_NAME,
         method: 'getUserUsingCI',
@@ -124,7 +123,6 @@ describe('AgentConfigService', () => {
         method: 'GET',
       });
       expect(result).toEqual(mockResponse.body);
-
       expect(LoggerProxy.info).toHaveBeenCalledWith('Fetching desktop profile', {
         module: CONFIG_FILE_NAME,
         method: 'getDesktopProfileById',
@@ -183,7 +181,6 @@ describe('AgentConfigService', () => {
         method: 'GET',
       });
       expect(result).toEqual(mockResponse.body);
-
       expect(LoggerProxy.info).toHaveBeenCalledWith('Fetching list of teams', {
         module: CONFIG_FILE_NAME,
         method: 'getListOfTeams',
@@ -263,11 +260,10 @@ describe('AgentConfigService', () => {
 
       expect(mockWebexRequest.request).toHaveBeenCalledWith({
         service: mockWccAPIURL,
-        resource: `organization/${mockOrgId}/v2/auxiliary-code?page=${page}&pageSize=${pageSize}&filter=id=in=(${filter})&attributes=${attributes}`,
+        resource: `organization/${mockOrgId}/v2/auxiliary-code?page=${page}&pageSize=${pageSize}&filter=id=in=(${filter})&attributes=${attributes}&desktopProfileFilter=true`,
         method: 'GET',
       });
       expect(result).toEqual(mockResponse.body);
-
       expect(LoggerProxy.info).toHaveBeenCalledWith('Fetching list of aux codes', {
         module: CONFIG_FILE_NAME,
         method: 'getListOfAuxCodes',
@@ -490,6 +486,49 @@ describe('AgentConfigService', () => {
     });
   });
 
+  describe('getAIFeatureFlags', () => {
+    it('should return AI feature flags successfully', async () => {
+      const mockResponse = {
+        statusCode: 200,
+        body: {
+          data: [{realtimeTranscripts: {enable: true}}],
+        },
+      };
+      mockWebexRequest.request.mockResolvedValue(mockResponse);
+
+      const result = await agentConfigService.getAIFeatureFlags(mockOrgId);
+      expect(result).toEqual(mockResponse.body);
+      expect(LoggerProxy.log).toHaveBeenCalledWith('getAIFeatureFlags api success.', {
+        module: CONFIG_FILE_NAME,
+        method: 'getAIFeatureFlags',
+      });
+    });
+
+    it('should throw an error if API call returns non-200 status code', async () => {
+      const mockError = {statusCode: 500};
+      mockWebexRequest.request.mockResolvedValue(mockError);
+
+      await expect(agentConfigService.getAIFeatureFlags(mockOrgId)).rejects.toThrow(
+        'API call failed with 500'
+      );
+      expect(LoggerProxy.error).toHaveBeenCalledWith(
+        'getAIFeatureFlags API call failed with Error: API call failed with 500',
+        {module: CONFIG_FILE_NAME, method: 'getAIFeatureFlags'}
+      );
+    });
+
+    it('should handle network errors gracefully', async () => {
+      const networkError = new Error('Network Error');
+      mockWebexRequest.request.mockRejectedValue(networkError);
+
+      await expect(agentConfigService.getAIFeatureFlags(mockOrgId)).rejects.toThrow('Network Error');
+      expect(LoggerProxy.error).toHaveBeenCalledWith(
+        'getAIFeatureFlags API call failed with Error: Network Error',
+        {module: CONFIG_FILE_NAME, method: 'getAIFeatureFlags'}
+      );
+    });
+  });
+
   describe(`getDialPlanData`, () => {
     it('should return dial plan data successfully', async () => {
       const mockResponse = {statusCode: 200, body: {data: {}}}; // Adjust data accordingly
@@ -667,6 +706,32 @@ describe('AgentConfigService', () => {
   });
 
   describe('getAgentConfig', () => {
+    const mockTeamData = [
+      {id: 'team1', name: 'Support Team'},
+      {id: 'team2', name: 'Sales Team'},
+    ];
+
+    const mockOrgInfo = {
+      tenantId: 'tenant123',
+      timezone: 'GMT',
+      environment: 'produs1',
+    };
+
+    const mockSiteInfo = {
+      id: 'c6a5451f-5ba7-49a1-aee8-fbef70c19ece',
+      name: 'Site-1',
+      multimediaProfileId: 'c5888e6f-5661-4871-9936-cbcec7658d41',
+    };
+
+    const mockURLMapping = [
+      {key: 'ACQUEON_API_URL', url: 'https://api.example.com'},
+      {key: 'ACQUEON_CONSOLE_URL', url: 'https://console.example.com'},
+    ];
+
+    const mockAIFeatureFlags = {
+      data: [{realtimeTranscripts: {enable: true}}],
+    };
+
     beforeEach(() => {
       jest.clearAllMocks();
     });
@@ -681,7 +746,7 @@ describe('AgentConfigService', () => {
         agentProfileId: 'profile123',
         siteId: 'site789',
         dbId: 'db123',
-        defaultDialledNumber: '1234567890',
+        deafultDialledNumber: '1234567890',
         id: 'user001',
         teamIds: ['team1', 'team2'],
       };
@@ -718,18 +783,13 @@ describe('AgentConfigService', () => {
       const mockOrgInfo = {
         tenantId: 'tenant123',
         timezone: 'GMT',
+        environment: 'produs1',
       };
 
       const mockOrgSettings = {
         campaignManagerEnabled: true,
         webRtcEnabled: true,
         maskSensitiveData: false,
-      };
-
-      const mockSiteInfo = {
-        id: 'c6a5451f-5ba7-49a1-aee8-fbef70c19ece',
-        name: 'Site-1',
-        multimediaProfileId: 'c5888e6f-5661-4871-9936-cbcec7658d41',
       };
 
       const mockTenantData = {
@@ -745,15 +805,13 @@ describe('AgentConfigService', () => {
         callVariablesSuppressed: false,
       };
 
-      const mockURLMapping = [
-        {key: 'ACQUEON_API_URL', url: 'https://api.example.com'},
-        {key: 'ACQUEON_CONSOLE_URL', url: 'https://console.example.com'},
-      ];
-
       const mockAuxCodes = [
         {id: 'aux1', type: 'WRAP_UP_CODE', name: 'Wrap Up Code 1', isDefault: true},
         {id: 'aux2', type: 'IDLE_CODE', name: 'Idle Code 1', isDefault: true},
       ];
+      const mockAIFeatureFlags = {
+        data: [{realtimeTranscripts: {enable: true}}],
+      };
 
       const parseAgentConfigsSpy = jest.spyOn(util, 'parseAgentConfigs');
       agentConfigService.getUserUsingCI = jest.fn().mockResolvedValue(mockUserConfig);
@@ -762,6 +820,7 @@ describe('AgentConfigService', () => {
       agentConfigService.getSiteInfo = jest.fn().mockResolvedValue(mockSiteInfo);
       agentConfigService.getTenantData = jest.fn().mockResolvedValue(mockTenantData);
       agentConfigService.getURLMapping = jest.fn().mockResolvedValue(mockURLMapping);
+      agentConfigService.getAIFeatureFlags = jest.fn().mockResolvedValue(mockAIFeatureFlags);
       agentConfigService.getAllAuxCodes = jest.fn().mockResolvedValue(mockAuxCodes);
       agentConfigService.getDesktopProfileById = jest.fn().mockResolvedValue(mockAgentProfile);
       agentConfigService.getDialPlanData = jest.fn().mockResolvedValue(mockDialPlanData);
@@ -801,6 +860,7 @@ describe('AgentConfigService', () => {
         dialPlanData: mockDialPlanData,
         urlMapping: mockURLMapping,
         multimediaProfileId: mockSiteInfo.multimediaProfileId,
+        aiFeatureFlags: mockAIFeatureFlags,
       });
     });
 
@@ -815,7 +875,7 @@ describe('AgentConfigService', () => {
         skillProfileId: 'skillProfile456',
         siteId: 'site789',
         dbId: 'db123',
-        defaultDialledNumber: '1234567890',
+        deafultDialledNumber: '1234567890',
         id: 'user001',
         teamIds: ['team1', 'team2'],
       };
@@ -857,18 +917,13 @@ describe('AgentConfigService', () => {
       const mockOrgInfo = {
         tenantId: 'tenant123',
         timezone: 'GMT',
+        environment: 'produs1',
       };
 
       const mockOrgSettings = {
         campaignManagerEnabled: true,
         webRtcEnabled: true,
         maskSensitiveData: true,
-      };
-
-      const mockSiteInfo = {
-        id: 'c6a5451f-5ba7-49a1-aee8-fbef70c19ece',
-        name: 'Site-1',
-        multimediaProfileId: 'c5888e6f-5661-4871-9936-cbcec7658d41',
       };
 
       const mockTenantData = {
@@ -885,15 +940,13 @@ describe('AgentConfigService', () => {
         lostConnectionRecoveryTimeout: 30,
       };
 
-      const mockURLMapping = [
-        {key: 'ACQUEON_API_URL', url: 'https://api.example.com'},
-        {key: 'ACQUEON_CONSOLE_URL', url: 'https://console.example.com'},
-      ];
-
       const mockAuxCodes = [
         {id: 'aux1', type: 'WRAP_UP_CODE', name: 'Wrap Up Code 1'},
         {id: 'aux2', type: 'IDLE_CODE', name: 'Idle Code 1'},
       ];
+      const mockAIFeatureFlags = {
+        data: [{realtimeTranscripts: {enable: true}}],
+      };
 
       const parseAgentConfigsSpy = jest.spyOn(util, 'parseAgentConfigs');
       agentConfigService.getUserUsingCI = jest.fn().mockResolvedValue(mockUserConfig);
@@ -902,6 +955,7 @@ describe('AgentConfigService', () => {
       agentConfigService.getSiteInfo = jest.fn().mockResolvedValue(mockSiteInfo);
       agentConfigService.getTenantData = jest.fn().mockResolvedValue(mockTenantData);
       agentConfigService.getURLMapping = jest.fn().mockResolvedValue(mockURLMapping);
+      agentConfigService.getAIFeatureFlags = jest.fn().mockResolvedValue(mockAIFeatureFlags);
       agentConfigService.getAllAuxCodes = jest.fn().mockResolvedValue(mockAuxCodes);
       agentConfigService.getDesktopProfileById = jest.fn().mockResolvedValue(mockAgentProfile);
       agentConfigService.getDialPlanData = jest.fn().mockResolvedValue(mockDialPlanData);
@@ -941,6 +995,7 @@ describe('AgentConfigService', () => {
         dialPlanData: mockDialPlanData,
         urlMapping: mockURLMapping,
         multimediaProfileId: mockSiteInfo.multimediaProfileId,
+        aiFeatureFlags: mockAIFeatureFlags,
       });
     });
 
@@ -952,6 +1007,7 @@ describe('AgentConfigService', () => {
       agentConfigService.getOrganizationSetting = jest.fn().mockResolvedValue({});
       agentConfigService.getTenantData = jest.fn().mockResolvedValue({});
       agentConfigService.getURLMapping = jest.fn().mockResolvedValue({});
+      agentConfigService.getAIFeatureFlags = jest.fn().mockResolvedValue({data: []});
       agentConfigService.getAllAuxCodes = jest.fn().mockResolvedValue({});
       agentConfigService.getDesktopProfileById = jest.fn().mockResolvedValue({});
       agentConfigService.getDialPlanData = jest.fn().mockResolvedValue({});

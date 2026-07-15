@@ -12,6 +12,15 @@ export function isSelf(object: HashTreeObject) {
 }
 
 /**
+ * Checks if the given hash tree object is of type "Metadata"
+ * @param {HashTreeObject} object object to check
+ * @returns {boolean} True if the object is of type "Metadata", false otherwise
+ */
+export function isMetadata(object: HashTreeObject) {
+  return object.htMeta.elementId.type.toLowerCase() === ObjectType.metadata;
+}
+
+/**
  * Analyzes given part of Locus DTO recursively and delete any nested objects that have their own htMeta
  *
  * @param {Object} currentLocusPart part of locus DTO to analyze
@@ -51,3 +60,39 @@ export const deleteNestedObjectsWithHtMeta = (
     }
   }
 };
+
+/**
+ * Reorders items so that those matching the given priority list come first (in priority order),
+ * followed by everything else in their original order.
+ *
+ * @param {Array<T>} items - The items to reorder
+ * @param {string[]} priority - Ordered list of names that should come first
+ * @returns {Array<T>} A new array with prioritized items first
+ */
+export function sortByInitPriority<T extends {name: string}>(items: T[], priority: string[]): T[] {
+  const prioritized = priority
+    .map((name) => items.find((item) => item.name === name))
+    .filter(Boolean) as T[];
+  const rest = items.filter((item) => !priority.includes(item.name));
+
+  return [...prioritized, ...rest];
+}
+
+/**
+ * Sleeps for the specified amount of milliseconds
+ *
+ * @param {number} ms amount of milliseconds to sleep
+ * @returns {Promise<void>} A promise that resolves after the specified delay
+ */
+export function sleep(ms: number): Promise<void> {
+  if (ms <= 0) {
+    return Promise.resolve();
+  }
+
+  return new Promise((resolve) => {
+    // start a timer that will resolve the promise after the specified delay
+    setTimeout(() => {
+      resolve();
+    }, ms);
+  });
+}

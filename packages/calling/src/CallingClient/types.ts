@@ -3,7 +3,7 @@ import {LOGGER} from '../Logger/types';
 import {ISDKConnector} from '../SDKConnector/types';
 import {Eventing} from '../Events/impl';
 import {CallingClientEventTypes} from '../Events/types';
-import {ServiceData} from '../common/types';
+import {DeviceType, ServiceData} from '../common/types';
 import {ICall} from './calling/types';
 import {CallingClientError} from '../Errors';
 import {ILine} from './line/types';
@@ -86,6 +86,13 @@ export interface ICallingClient extends Eventing<CallingClientEventTypes> {
   getLines(): Record<string, ILine>;
 
   /**
+   * Retrieves the list of devices registered for the given userId from Mobius.
+   * @param userId - The user identifier whose devices should be fetched.
+   * @returns List of devices associated with the user.
+   */
+  getDevices(userId?: string): Promise<DeviceType[]>;
+
+  /**
    * Retrieves a dictionary of active calls grouped by `lineId`.
    *
    * This method gathers active {@link ICall}  objects and organizes them into a dictionary
@@ -121,4 +128,22 @@ export interface ICallingClient extends Eventing<CallingClientEventTypes> {
    * The `connectedCall` object will be the Call object of the connected call with the client
    */
   getConnectedCall(): ICall | undefined;
+
+  /**
+   * Indicates whether the Mobius WebSocket transport is currently connected.
+   *
+   * The `callingClient:mobius_socket_connected` event is emitted during client
+   * initialization, so consumers that subscribe afterwards may miss it. This method
+   * lets them reconcile the current connection state right after subscribing. Returns
+   * `false` when the WebSocket transport is not in use.
+   *
+   * @example
+   * ```typescript
+   * callingClient.on(CALLING_CLIENT_EVENT_KEYS.MOBIUS_SOCKET_CONNECTED, onConnected);
+   * if (callingClient.isMobiusSocketConnected()) {
+   *   onConnected();
+   * }
+   * ```
+   */
+  isMobiusSocketConnected(): boolean;
 }

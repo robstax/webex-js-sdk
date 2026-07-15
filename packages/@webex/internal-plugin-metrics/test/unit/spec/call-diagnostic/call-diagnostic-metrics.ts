@@ -44,6 +44,7 @@ describe('internal-plugin-metrics', () => {
       locusInfo: {
         fullState: {
           lastActive: 'lastActive',
+          sessionId: 'locusSessionId',
         },
       },
       meetingInfo: {},
@@ -431,6 +432,7 @@ describe('internal-plugin-metrics', () => {
           correlationId: 'correlationId',
           deviceId: 'deviceUrl',
           locusId: 'url',
+          locusSessionId: 'locusSessionId',
           locusStartTime: 'lastActive',
           locusUrl: 'locus/url',
           machineId: 'installationId',
@@ -460,6 +462,7 @@ describe('internal-plugin-metrics', () => {
             correlationId: 'correlationId',
             deviceId: 'deviceUrl',
             locusId: 'url',
+            locusSessionId: 'locusSessionId',
             locusStartTime: 'lastActive',
             locusUrl: 'locus/url',
             machineId: 'installationId',
@@ -490,6 +493,7 @@ describe('internal-plugin-metrics', () => {
           sessionCorrelationId: 'sessionCorrelationId',
           deviceId: 'deviceUrl',
           locusId: 'url',
+          locusSessionId: 'locusSessionId',
           locusStartTime: 'lastActive',
           locusUrl: 'locus/url',
           machineId: 'installationId',
@@ -519,6 +523,7 @@ describe('internal-plugin-metrics', () => {
           sessionCorrelationId: 'sessionCorrelationId',
           deviceId: 'deviceUrl',
           locusId: 'url',
+          locusSessionId: 'locusSessionId',
           locusStartTime: 'lastActive',
           locusUrl: 'locus/url',
           machineId: 'installationId',
@@ -554,6 +559,7 @@ describe('internal-plugin-metrics', () => {
           globalMeetingId: 'globalMeetingId1',
           deviceId: 'deviceUrl',
           locusId: 'url',
+          locusSessionId: 'locusSessionId',
           locusStartTime: 'lastActive',
           locusUrl: 'locus/url',
           mediaAgentAlias: 'mediaAgentAlias',
@@ -586,6 +592,7 @@ describe('internal-plugin-metrics', () => {
           globalMeetingId: 'globalMeetingId1',
           deviceId: 'deviceUrl',
           locusId: 'url',
+          locusSessionId: 'locusSessionId',
           locusStartTime: 'lastActive',
           locusUrl: 'locus/url',
           mediaAgentAlias: 'mediaAgentAlias',
@@ -620,6 +627,7 @@ describe('internal-plugin-metrics', () => {
           deviceId: 'deviceUrl',
           locusId: 'url',
           locusStartTime: 'lastActive',
+          locusSessionId: 'locusSessionId',
           locusUrl: 'locus/url',
           mediaAgentAlias: 'mediaAgentAlias',
           mediaAgentGroupId: 'mediaAgentGroupId',
@@ -655,6 +663,7 @@ describe('internal-plugin-metrics', () => {
           globalMeetingId: 'globalMeetingId1',
           deviceId: 'deviceUrl',
           locusId: 'url',
+          locusSessionId: 'locusSessionId',
           locusStartTime: 'lastActive',
           locusUrl: 'locus/url',
           mediaAgentAlias: 'mediaAgentAlias',
@@ -848,6 +857,77 @@ describe('internal-plugin-metrics', () => {
       });
     });
 
+    describe('#prepareDiagnosticEvent isAutomatedUser field', () => {
+      it('should set isAutomatedUser to false when window is not defined', () => {
+        const options = {meetingId: fakeMeeting.id};
+        sinon.stub(cd, 'getOrigin').returns({origin: 'fake-origin'});
+
+        const res = cd.prepareDiagnosticEvent(
+          {
+            canProceed: true,
+            identifiers: {correlationId: 'test-id'},
+            name: 'client.alert.displayed',
+            isAutomatedUser: false,
+          },
+          options
+        );
+
+        // In the test environment, isAutomatedUser should be false since we're not in a webdriver environment
+        assert.isFalse(
+          res.event.isAutomatedUser,
+          'isAutomatedUser should be false in non-webdriver test environment'
+        );
+      });
+
+      it('should include isAutomatedUser field in the returned event', () => {
+        const options = {meetingId: fakeMeeting.id};
+        sinon.stub(cd, 'getOrigin').returns({origin: 'fake-origin'});
+
+        const res = cd.prepareDiagnosticEvent(
+          {
+            canProceed: true,
+            identifiers: {correlationId: 'test-id'},
+            name: 'client.alert.displayed',
+            isAutomatedUser: false,
+          },
+          options
+        );
+
+        // Verify the isAutomatedUser field is present in the event
+        assert.isDefined(res.event.isAutomatedUser, 'isAutomatedUser field should be defined');
+        assert.isBoolean(res.event.isAutomatedUser, 'isAutomatedUser should be a boolean');
+      });
+
+      it('should set isAutomatedUser to true when navigator.webdriver is true', () => {
+        const originalDescriptor = Object.getOwnPropertyDescriptor(global, 'navigator');
+        Object.defineProperty(global, 'navigator', {
+          value: {webdriver: true},
+          configurable: true,
+          writable: true,
+        });
+
+        const prepareDiagnosticEventSpy = sinon.spy(cd, 'prepareDiagnosticEvent');
+        sinon.stub(cd, 'getOrigin').returns({origin: 'fake-origin'});
+        cd.setMercuryConnectedStatus(true);
+
+        cd.submitClientEvent({
+          name: 'client.alert.displayed',
+          options: {correlationId: 'correlationId'},
+        });
+
+        assert.isTrue(
+          prepareDiagnosticEventSpy.firstCall.args[0].isAutomatedUser,
+          'isAutomatedUser should be true when navigator.webdriver is set'
+        );
+
+        if (originalDescriptor) {
+          Object.defineProperty(global, 'navigator', originalDescriptor);
+        } else {
+          delete (global as any).navigator;
+        }
+      });
+    });
+
     describe('#submitClientEvent', () => {
       it('should submit client event successfully with meetingId', () => {
         const prepareDiagnosticEventSpy = sinon.spy(cd, 'prepareDiagnosticEvent');
@@ -889,6 +969,7 @@ describe('internal-plugin-metrics', () => {
               correlationId: 'correlationId',
               deviceId: 'deviceUrl',
               locusId: 'url',
+              locusSessionId: 'locusSessionId',
               locusStartTime: 'lastActive',
               locusUrl: 'locus/url',
               mediaAgentAlias: 'alias',
@@ -897,11 +978,14 @@ describe('internal-plugin-metrics', () => {
               userId: 'userId',
             },
             loginType: 'login-ci',
+            telemetryOptOut: undefined,
             name: 'client.alert.displayed',
             userType: 'host',
             isConvergedArchitectureEnabled: undefined,
             webexSubServiceType: undefined,
             webClientPreload: undefined,
+            isVipMeeting: false,
+            isAutomatedUser: false,
           },
           options
         );
@@ -916,6 +1000,7 @@ describe('internal-plugin-metrics', () => {
               correlationId: 'correlationId',
               deviceId: 'deviceUrl',
               locusId: 'url',
+              locusSessionId: 'locusSessionId',
               locusStartTime: 'lastActive',
               locusUrl: 'locus/url',
               mediaAgentAlias: 'alias',
@@ -924,11 +1009,14 @@ describe('internal-plugin-metrics', () => {
               userId: 'userId',
             },
             loginType: 'login-ci',
+            telemetryOptOut: undefined,
             name: 'client.alert.displayed',
             userType: 'host',
             isConvergedArchitectureEnabled: undefined,
             webexSubServiceType: undefined,
             webClientPreload: undefined,
+            isVipMeeting: false,
+            isAutomatedUser: false,
           },
           eventId: 'my-fake-id',
           origin: {
@@ -954,6 +1042,7 @@ describe('internal-plugin-metrics', () => {
                 correlationId: 'correlationId',
                 deviceId: 'deviceUrl',
                 locusId: 'url',
+                locusSessionId: 'locusSessionId',
                 locusStartTime: 'lastActive',
                 locusUrl: 'locus/url',
                 mediaAgentAlias: 'alias',
@@ -962,11 +1051,14 @@ describe('internal-plugin-metrics', () => {
                 userId: 'userId',
               },
               loginType: 'login-ci',
+              telemetryOptOut: undefined,
               name: 'client.alert.displayed',
               userType: 'host',
               isConvergedArchitectureEnabled: undefined,
               webexSubServiceType: undefined,
               webClientPreload: undefined,
+              isVipMeeting: false,
+              isAutomatedUser: false,
             },
             eventId: 'my-fake-id',
             origin: {
@@ -1028,6 +1120,7 @@ describe('internal-plugin-metrics', () => {
               correlationId: 'correlationId',
               deviceId: 'deviceUrl',
               locusId: 'url',
+              locusSessionId: 'locusSessionId',
               locusStartTime: 'lastActive',
               locusUrl: 'locus/url',
               mediaAgentAlias: 'alias',
@@ -1036,11 +1129,14 @@ describe('internal-plugin-metrics', () => {
               userId: 'userId',
             },
             loginType: 'login-ci',
+            telemetryOptOut: undefined,
             name: 'client.alert.displayed',
             userType: 'host',
             isConvergedArchitectureEnabled: undefined,
             webexSubServiceType: undefined,
             webClientPreload: undefined,
+            isVipMeeting: false,
+            isAutomatedUser: false,
           },
           options
         );
@@ -1055,6 +1151,7 @@ describe('internal-plugin-metrics', () => {
               correlationId: 'correlationId',
               deviceId: 'deviceUrl',
               locusId: 'url',
+              locusSessionId: 'locusSessionId',
               locusStartTime: 'lastActive',
               locusUrl: 'locus/url',
               mediaAgentAlias: 'alias',
@@ -1063,11 +1160,14 @@ describe('internal-plugin-metrics', () => {
               userId: 'userId',
             },
             loginType: 'login-ci',
+            telemetryOptOut: undefined,
             name: 'client.alert.displayed',
             userType: 'host',
             isConvergedArchitectureEnabled: undefined,
             webexSubServiceType: undefined,
             webClientPreload: undefined,
+            isVipMeeting: false,
+            isAutomatedUser: false,
           },
           eventId: 'my-fake-id',
           origin: {
@@ -1093,6 +1193,7 @@ describe('internal-plugin-metrics', () => {
                 correlationId: 'correlationId',
                 deviceId: 'deviceUrl',
                 locusId: 'url',
+                locusSessionId: 'locusSessionId',
                 locusStartTime: 'lastActive',
                 locusUrl: 'locus/url',
                 mediaAgentAlias: 'alias',
@@ -1101,11 +1202,14 @@ describe('internal-plugin-metrics', () => {
                 userId: 'userId',
               },
               loginType: 'login-ci',
+              telemetryOptOut: undefined,
               name: 'client.alert.displayed',
               userType: 'host',
               isConvergedArchitectureEnabled: undefined,
               webexSubServiceType: undefined,
               webClientPreload: undefined,
+              isVipMeeting: false,
+              isAutomatedUser: false,
             },
             eventId: 'my-fake-id',
             origin: {
@@ -1168,6 +1272,7 @@ describe('internal-plugin-metrics', () => {
               sessionCorrelationId: 'sessionCorrelationId3',
               deviceId: 'deviceUrl',
               locusId: 'url',
+              locusSessionId: 'locusSessionId',
               locusStartTime: 'lastActive',
               locusUrl: 'locus/url',
               mediaAgentAlias: 'alias',
@@ -1176,11 +1281,14 @@ describe('internal-plugin-metrics', () => {
               userId: 'userId',
             },
             loginType: 'login-ci',
+            telemetryOptOut: undefined,
             name: 'client.alert.displayed',
             userType: 'host',
             isConvergedArchitectureEnabled: undefined,
             webexSubServiceType: undefined,
             webClientPreload: undefined,
+            isVipMeeting: false,
+            isAutomatedUser: false,
           },
           options
         );
@@ -1196,6 +1304,7 @@ describe('internal-plugin-metrics', () => {
               sessionCorrelationId: 'sessionCorrelationId3',
               deviceId: 'deviceUrl',
               locusId: 'url',
+              locusSessionId: 'locusSessionId',
               locusStartTime: 'lastActive',
               locusUrl: 'locus/url',
               mediaAgentAlias: 'alias',
@@ -1204,11 +1313,14 @@ describe('internal-plugin-metrics', () => {
               userId: 'userId',
             },
             loginType: 'login-ci',
+            telemetryOptOut: undefined,
             name: 'client.alert.displayed',
             userType: 'host',
             isConvergedArchitectureEnabled: undefined,
             webexSubServiceType: undefined,
             webClientPreload: undefined,
+            isVipMeeting: false,
+            isAutomatedUser: false,
           },
           eventId: 'my-fake-id',
           origin: {
@@ -1235,6 +1347,7 @@ describe('internal-plugin-metrics', () => {
                 sessionCorrelationId: 'sessionCorrelationId3',
                 deviceId: 'deviceUrl',
                 locusId: 'url',
+                locusSessionId: 'locusSessionId',
                 locusStartTime: 'lastActive',
                 locusUrl: 'locus/url',
                 mediaAgentAlias: 'alias',
@@ -1243,11 +1356,14 @@ describe('internal-plugin-metrics', () => {
                 userId: 'userId',
               },
               loginType: 'login-ci',
+              telemetryOptOut: undefined,
               name: 'client.alert.displayed',
               userType: 'host',
               isConvergedArchitectureEnabled: undefined,
               webexSubServiceType: undefined,
               webClientPreload: undefined,
+              isVipMeeting: false,
+              isAutomatedUser: false,
             },
             eventId: 'my-fake-id',
             origin: {
@@ -1309,6 +1425,7 @@ describe('internal-plugin-metrics', () => {
               correlationId: 'correlationId',
               deviceId: 'deviceUrl',
               locusId: 'url',
+              locusSessionId: 'locusSessionId',
               locusStartTime: 'lastActive',
               locusUrl: 'locus/url',
               mediaAgentAlias: 'alias',
@@ -1317,11 +1434,14 @@ describe('internal-plugin-metrics', () => {
               userId: 'userId',
             },
             loginType: 'login-ci',
+            telemetryOptOut: undefined,
             webClientPreload: undefined,
             name: 'client.alert.displayed',
             userType: 'host',
             isConvergedArchitectureEnabled: undefined,
             webexSubServiceType: undefined,
+            isVipMeeting: false,
+            isAutomatedUser: false,
           },
           options
         );
@@ -1337,6 +1457,7 @@ describe('internal-plugin-metrics', () => {
               correlationId: 'correlationId',
               deviceId: 'deviceUrl',
               locusId: 'url',
+              locusSessionId: 'locusSessionId',
               locusStartTime: 'lastActive',
               locusUrl: 'locus/url',
               mediaAgentAlias: 'alias',
@@ -1345,11 +1466,14 @@ describe('internal-plugin-metrics', () => {
               userId: 'userId',
             },
             loginType: 'login-ci',
+            telemetryOptOut: undefined,
             webClientPreload: undefined,
             name: 'client.alert.displayed',
             userType: 'host',
             isConvergedArchitectureEnabled: undefined,
             webexSubServiceType: undefined,
+            isVipMeeting: false,
+            isAutomatedUser: false,
           },
           eventId: 'my-fake-id',
           origin: {
@@ -1376,6 +1500,7 @@ describe('internal-plugin-metrics', () => {
                 correlationId: 'correlationId',
                 deviceId: 'deviceUrl',
                 locusId: 'url',
+                locusSessionId: 'locusSessionId',
                 locusStartTime: 'lastActive',
                 locusUrl: 'locus/url',
                 mediaAgentAlias: 'alias',
@@ -1384,11 +1509,14 @@ describe('internal-plugin-metrics', () => {
                 userId: 'userId',
               },
               loginType: 'login-ci',
+              telemetryOptOut: undefined,
               webClientPreload: undefined,
               name: 'client.alert.displayed',
               userType: 'host',
               isConvergedArchitectureEnabled: undefined,
               webexSubServiceType: undefined,
+              isVipMeeting: false,
+              isAutomatedUser: false,
             },
             eventId: 'my-fake-id',
             origin: {
@@ -1450,6 +1578,7 @@ describe('internal-plugin-metrics', () => {
               sessionCorrelationId: 'sessionCorrelationId5',
               deviceId: 'deviceUrl',
               locusId: 'url',
+              locusSessionId: 'locusSessionId',
               locusStartTime: 'lastActive',
               locusUrl: 'locus/url',
               mediaAgentAlias: 'alias',
@@ -1458,6 +1587,7 @@ describe('internal-plugin-metrics', () => {
               userId: 'userId',
             },
             loginType: 'login-ci',
+            telemetryOptOut: undefined,
             name: 'client.alert.displayed',
             userType: 'host',
             userNameInput: 'test',
@@ -1465,6 +1595,8 @@ describe('internal-plugin-metrics', () => {
             isConvergedArchitectureEnabled: undefined,
             webexSubServiceType: undefined,
             webClientPreload: undefined,
+            isVipMeeting: false,
+            isAutomatedUser: false,
           },
           options
         );
@@ -1480,6 +1612,7 @@ describe('internal-plugin-metrics', () => {
               sessionCorrelationId: 'sessionCorrelationId5',
               deviceId: 'deviceUrl',
               locusId: 'url',
+              locusSessionId: 'locusSessionId',
               locusStartTime: 'lastActive',
               locusUrl: 'locus/url',
               mediaAgentAlias: 'alias',
@@ -1488,6 +1621,7 @@ describe('internal-plugin-metrics', () => {
               userId: 'userId',
             },
             loginType: 'login-ci',
+            telemetryOptOut: undefined,
             name: 'client.alert.displayed',
             userType: 'host',
             userNameInput: 'test',
@@ -1495,6 +1629,8 @@ describe('internal-plugin-metrics', () => {
             isConvergedArchitectureEnabled: undefined,
             webexSubServiceType: undefined,
             webClientPreload: undefined,
+            isVipMeeting: false,
+            isAutomatedUser: false,
           },
           eventId: 'my-fake-id',
           origin: {
@@ -1521,6 +1657,7 @@ describe('internal-plugin-metrics', () => {
                 sessionCorrelationId: 'sessionCorrelationId5',
                 deviceId: 'deviceUrl',
                 locusId: 'url',
+                locusSessionId: 'locusSessionId',
                 locusStartTime: 'lastActive',
                 locusUrl: 'locus/url',
                 mediaAgentAlias: 'alias',
@@ -1529,6 +1666,7 @@ describe('internal-plugin-metrics', () => {
                 userId: 'userId',
               },
               loginType: 'login-ci',
+              telemetryOptOut: undefined,
               name: 'client.alert.displayed',
               userType: 'host',
               userNameInput: 'test',
@@ -1536,6 +1674,8 @@ describe('internal-plugin-metrics', () => {
               isConvergedArchitectureEnabled: undefined,
               webexSubServiceType: undefined,
               webClientPreload: undefined,
+              isVipMeeting: false,
+              isAutomatedUser: false,
             },
             eventId: 'my-fake-id',
             origin: {
@@ -1660,8 +1800,10 @@ describe('internal-plugin-metrics', () => {
               userId: 'userId',
             },
             loginType: 'login-ci',
+            telemetryOptOut: undefined,
             name: 'client.alert.displayed',
             webClientPreload: undefined,
+            isAutomatedUser: false,
           },
           options
         );
@@ -1683,8 +1825,10 @@ describe('internal-plugin-metrics', () => {
               userId: 'userId',
             },
             loginType: 'login-ci',
+            telemetryOptOut: undefined,
             name: 'client.alert.displayed',
             webClientPreload: undefined,
+            isAutomatedUser: false,
           },
           eventId: 'my-fake-id',
           origin: {
@@ -1758,8 +1902,10 @@ describe('internal-plugin-metrics', () => {
               userId: 'myPreLoginId',
             },
             loginType: 'login-ci',
+            telemetryOptOut: undefined,
             name: 'client.alert.displayed',
             webClientPreload: undefined,
+            isAutomatedUser: false,
           },
           options
         );
@@ -1787,7 +1933,9 @@ describe('internal-plugin-metrics', () => {
               },
               eventData: {webClientDomain: 'whatever', isMercuryConnected: true},
               loginType: 'login-ci',
+              telemetryOptOut: undefined,
               webClientPreload: undefined,
+              isAutomatedUser: false,
             },
           },
           options.preLoginId
@@ -1849,8 +1997,10 @@ describe('internal-plugin-metrics', () => {
             userNameInput: 'current',
             emailInput: 'current',
             loginType: 'login-ci',
+            telemetryOptOut: undefined,
             name: 'client.alert.displayed',
             webClientPreload: undefined,
+            isAutomatedUser: false,
           },
           options
         );
@@ -1878,9 +2028,11 @@ describe('internal-plugin-metrics', () => {
               },
               eventData: {webClientDomain: 'whatever', isMercuryConnected: true},
               loginType: 'login-ci',
+              telemetryOptOut: undefined,
               userNameInput: 'current',
               emailInput: 'current',
               webClientPreload: undefined,
+              isAutomatedUser: false,
             },
           },
           options.preLoginId
@@ -1911,6 +2063,7 @@ describe('internal-plugin-metrics', () => {
               correlationId: 'correlationId2',
               deviceId: 'deviceUrl',
               locusId: 'url',
+              locusSessionId: 'locusSessionId',
               locusStartTime: 'lastActive',
               locusUrl: 'locus/url',
               mediaAgentAlias: 'alias',
@@ -1919,12 +2072,15 @@ describe('internal-plugin-metrics', () => {
               userId: 'userId',
             },
             loginType: 'fakeLoginType',
+            telemetryOptOut: undefined,
             name: 'client.alert.displayed',
             userType: 'host',
             joinFlowVersion: 'Other',
             isConvergedArchitectureEnabled: undefined,
             webexSubServiceType: undefined,
             webClientPreload: undefined,
+            isVipMeeting: false,
+            isAutomatedUser: false,
           },
           eventId: 'my-fake-id',
           origin: {
@@ -1965,6 +2121,7 @@ describe('internal-plugin-metrics', () => {
               sessionCorrelationId: 'sessionCorrelationId1',
               deviceId: 'deviceUrl',
               locusId: 'url',
+              locusSessionId: 'locusSessionId',
               locusStartTime: 'lastActive',
               locusUrl: 'locus/url',
               mediaAgentAlias: 'alias',
@@ -1973,12 +2130,15 @@ describe('internal-plugin-metrics', () => {
               userId: 'userId',
             },
             loginType: 'fakeLoginType',
+            telemetryOptOut: undefined,
             name: 'client.alert.displayed',
             userType: 'host',
             joinFlowVersion: 'Other',
             isConvergedArchitectureEnabled: undefined,
             webexSubServiceType: undefined,
             webClientPreload: undefined,
+            isVipMeeting: false,
+            isAutomatedUser: false,
           },
           eventId: 'my-fake-id',
           origin: {
@@ -2033,8 +2193,10 @@ describe('internal-plugin-metrics', () => {
               userId: 'userId',
             },
             loginType: 'login-ci',
+            telemetryOptOut: undefined,
             name: 'client.alert.displayed',
             webClientPreload: true,
+            isAutomatedUser: false,
           },
           options
         );
@@ -2056,8 +2218,216 @@ describe('internal-plugin-metrics', () => {
               userId: 'userId',
             },
             loginType: 'login-ci',
+            telemetryOptOut: undefined,
             name: 'client.alert.displayed',
             webClientPreload: true,
+            isAutomatedUser: false,
+          },
+          eventId: 'my-fake-id',
+          origin: {
+            origin: 'fake-origin',
+          },
+          originTime: {
+            sent: 'not_defined_yet',
+            triggered: now.toISOString(),
+          },
+          senderCountryCode: 'UK',
+          version: 1,
+        });
+      });
+
+      it('should submit client event with isVipMeeting: false when vipMeeting is false', () => {
+        const prepareDiagnosticEventSpy = sinon.spy(cd, 'prepareDiagnosticEvent');
+        const submitToCallDiagnosticsSpy = sinon.spy(cd, 'submitToCallDiagnostics');
+        const generateClientEventErrorPayloadSpy = sinon.spy(cd, 'generateClientEventErrorPayload');
+        sinon.stub(cd, 'getOrigin').returns({origin: 'fake-origin'});
+
+        webex.meetings.getBasicMeetingInformation = sinon.stub().returns({
+          ...fakeMeeting,
+          meetingInfo: {
+            vipmeeting: false,
+          },
+        });
+
+        const options = {
+          correlationId: 'correlationId',
+          webexConferenceIdStr: 'webexConferenceIdStr1',
+          globalMeetingId: 'globalMeetingId1',
+          sessionCorrelationId: 'sessionCorrelationId1',
+          meetingId: fakeMeeting.id,
+        };
+        cd.setMercuryConnectedStatus(true);
+        cd.submitClientEvent({
+          name: 'client.alert.displayed',
+          options,
+        });
+
+        assert.notCalled(generateClientEventErrorPayloadSpy);
+        assert.calledWith(
+          prepareDiagnosticEventSpy,
+          {
+            canProceed: true,
+            eventData: {
+              webClientDomain: 'whatever',
+              isMercuryConnected: true,
+            },
+            identifiers: {
+              correlationId: 'correlationId',
+              webexConferenceIdStr: 'webexConferenceIdStr1',
+              globalMeetingId: 'globalMeetingId1',
+              sessionCorrelationId: 'sessionCorrelationId1',
+              deviceId: 'deviceUrl',
+              locusId: 'url',
+              locusSessionId: 'locusSessionId',
+              locusStartTime: 'lastActive',
+              locusUrl: 'locus/url',
+              orgId: 'orgId',
+              userId: 'userId',
+            },
+            loginType: 'login-ci',
+            telemetryOptOut: undefined,
+            name: 'client.alert.displayed',
+            userType: 'host',
+            isConvergedArchitectureEnabled: undefined,
+            webexSubServiceType: undefined,
+            webClientPreload: undefined,
+            isVipMeeting: false,
+            isAutomatedUser: false,
+          },
+          options
+        );
+        assert.calledWith(submitToCallDiagnosticsSpy, {
+          event: {
+            canProceed: true,
+            eventData: {
+              webClientDomain: 'whatever',
+              isMercuryConnected: true,
+            },
+            identifiers: {
+              correlationId: 'correlationId',
+              webexConferenceIdStr: 'webexConferenceIdStr1',
+              globalMeetingId: 'globalMeetingId1',
+              sessionCorrelationId: 'sessionCorrelationId1',
+              deviceId: 'deviceUrl',
+              locusId: 'url',
+              locusSessionId: 'locusSessionId',
+              locusStartTime: 'lastActive',
+              locusUrl: 'locus/url',
+              orgId: 'orgId',
+              userId: 'userId',
+            },
+            loginType: 'login-ci',
+            telemetryOptOut: undefined,
+            name: 'client.alert.displayed',
+            userType: 'host',
+            isConvergedArchitectureEnabled: undefined,
+            webexSubServiceType: undefined,
+            webClientPreload: undefined,
+            isVipMeeting: false,
+            isAutomatedUser: false,
+          },
+          eventId: 'my-fake-id',
+          origin: {
+            origin: 'fake-origin',
+          },
+          originTime: {
+            sent: 'not_defined_yet',
+            triggered: now.toISOString(),
+          },
+          senderCountryCode: 'UK',
+          version: 1,
+        });
+      });
+
+      it('should submit client event with isVipMeeting: true when vipMeeting is true', () => {
+        const prepareDiagnosticEventSpy = sinon.spy(cd, 'prepareDiagnosticEvent');
+        const submitToCallDiagnosticsSpy = sinon.spy(cd, 'submitToCallDiagnostics');
+        const generateClientEventErrorPayloadSpy = sinon.spy(cd, 'generateClientEventErrorPayload');
+        sinon.stub(cd, 'getOrigin').returns({origin: 'fake-origin'});
+
+        webex.meetings.getBasicMeetingInformation = sinon.stub().returns({
+          ...fakeMeeting,
+          meetingInfo: {
+            vipmeeting: true,
+          },
+        });
+
+        const options = {
+          correlationId: 'correlationId',
+          webexConferenceIdStr: 'webexConferenceIdStr1',
+          globalMeetingId: 'globalMeetingId1',
+          sessionCorrelationId: 'sessionCorrelationId1',
+          meetingId: fakeMeeting.id,
+        };
+        cd.setMercuryConnectedStatus(true);
+        cd.submitClientEvent({
+          name: 'client.alert.displayed',
+          options,
+        });
+
+        assert.notCalled(generateClientEventErrorPayloadSpy);
+        assert.calledWith(
+          prepareDiagnosticEventSpy,
+          {
+            canProceed: true,
+            eventData: {
+              webClientDomain: 'whatever',
+              isMercuryConnected: true,
+            },
+            identifiers: {
+              correlationId: 'correlationId',
+              webexConferenceIdStr: 'webexConferenceIdStr1',
+              globalMeetingId: 'globalMeetingId1',
+              sessionCorrelationId: 'sessionCorrelationId1',
+              deviceId: 'deviceUrl',
+              locusId: 'url',
+              locusSessionId: 'locusSessionId',
+              locusStartTime: 'lastActive',
+              locusUrl: 'locus/url',
+              orgId: 'orgId',
+              userId: 'userId',
+            },
+            loginType: 'login-ci',
+            telemetryOptOut: undefined,
+            name: 'client.alert.displayed',
+            userType: 'host',
+            isConvergedArchitectureEnabled: undefined,
+            webexSubServiceType: undefined,
+            webClientPreload: undefined,
+            isVipMeeting: true,
+            isAutomatedUser: false,
+          },
+          options
+        );
+        assert.calledWith(submitToCallDiagnosticsSpy, {
+          event: {
+            canProceed: true,
+            eventData: {
+              webClientDomain: 'whatever',
+              isMercuryConnected: true,
+            },
+            identifiers: {
+              correlationId: 'correlationId',
+              webexConferenceIdStr: 'webexConferenceIdStr1',
+              globalMeetingId: 'globalMeetingId1',
+              sessionCorrelationId: 'sessionCorrelationId1',
+              deviceId: 'deviceUrl',
+              locusId: 'url',
+              locusSessionId: 'locusSessionId',
+              locusStartTime: 'lastActive',
+              locusUrl: 'locus/url',
+              orgId: 'orgId',
+              userId: 'userId',
+            },
+            loginType: 'login-ci',
+            telemetryOptOut: undefined,
+            name: 'client.alert.displayed',
+            userType: 'host',
+            isConvergedArchitectureEnabled: undefined,
+            webexSubServiceType: undefined,
+            webClientPreload: undefined,
+            isVipMeeting: true,
+            isAutomatedUser: false,
           },
           eventId: 'my-fake-id',
           origin: {
@@ -2106,6 +2476,7 @@ describe('internal-plugin-metrics', () => {
               globalMeetingId: 'globalMeetingId1',
               deviceId: 'deviceUrl',
               locusId: 'url',
+              locusSessionId: 'locusSessionId',
               locusStartTime: 'lastActive',
               locusUrl: 'locus/url',
               mediaAgentAlias: 'alias',
@@ -2126,11 +2497,14 @@ describe('internal-plugin-metrics', () => {
               },
             ],
             loginType: 'login-ci',
+            telemetryOptOut: undefined,
             name: 'client.alert.displayed',
             userType: 'host',
             isConvergedArchitectureEnabled: undefined,
             webexSubServiceType: undefined,
             webClientPreload: undefined,
+            isVipMeeting: false,
+            isAutomatedUser: false,
           },
           eventId: 'my-fake-id',
           origin: {
@@ -2184,6 +2558,7 @@ describe('internal-plugin-metrics', () => {
               correlationId: 'correlationId',
               deviceId: 'deviceUrl',
               locusId: 'url',
+              locusSessionId: 'locusSessionId',
               locusStartTime: 'lastActive',
               locusUrl: 'locus/url',
               mediaAgentAlias: 'alias',
@@ -2207,11 +2582,14 @@ describe('internal-plugin-metrics', () => {
               },
             ],
             loginType: 'login-ci',
+            telemetryOptOut: undefined,
             name: 'client.alert.displayed',
             userType: 'host',
             isConvergedArchitectureEnabled: undefined,
             webexSubServiceType: undefined,
             webClientPreload: undefined,
+            isVipMeeting: false,
+            isAutomatedUser: false,
           },
           eventId: 'my-fake-id',
           origin: {
@@ -2283,8 +2661,10 @@ describe('internal-plugin-metrics', () => {
               },
             ],
             loginType: 'login-ci',
+            telemetryOptOut: undefined,
             name: 'client.alert.displayed',
             webClientPreload: undefined,
+            isAutomatedUser: false,
           },
           eventId: 'my-fake-id',
           origin: {
@@ -2358,8 +2738,10 @@ describe('internal-plugin-metrics', () => {
               },
             ],
             loginType: 'login-ci',
+            telemetryOptOut: undefined,
             name: 'client.alert.displayed',
             webClientPreload: undefined,
+            isAutomatedUser: false,
           },
           eventId: 'my-fake-id',
           origin: {
@@ -2423,6 +2805,7 @@ describe('internal-plugin-metrics', () => {
               correlationId: 'correlationId',
               deviceId: 'deviceUrl',
               locusId: 'url',
+              locusSessionId: 'locusSessionId',
               locusStartTime: 'lastActive',
               locusUrl: 'locus/url',
               mediaAgentAlias: 'alias',
@@ -2439,11 +2822,14 @@ describe('internal-plugin-metrics', () => {
               },
             ],
             loginType: 'login-ci',
+            telemetryOptOut: undefined,
             name: 'client.alert.displayed',
             userType: 'host',
             isConvergedArchitectureEnabled: undefined,
             webexSubServiceType: undefined,
             webClientPreload: undefined,
+            isVipMeeting: false,
+            isAutomatedUser: false,
           },
           eventId: 'my-fake-id',
           origin: {
@@ -2534,16 +2920,18 @@ describe('internal-plugin-metrics', () => {
           });
 
           assert.calledThrice(submitToCallDiagnosticsStub);
-          });
+        });
 
-        ([
-          ['client.media.render.start'],
-          ['client.media.render.stop'],
-          ['client.media.rx.start'],
-          ['client.media.rx.stop'],
-          ['client.media.tx.start'],
-          ['client.media.tx.stop']
-        ] as const).forEach(([name]) => {
+        (
+          [
+            ['client.media.render.start'],
+            ['client.media.render.stop'],
+            ['client.media.rx.start'],
+            ['client.media.rx.stop'],
+            ['client.media.tx.start'],
+            ['client.media.tx.stop'],
+          ] as const
+        ).forEach(([name]) => {
           it(`should only send ${name} once per mediaType`, () => {
             const options = {
               meetingId: fakeMeeting.id,
@@ -2587,7 +2975,8 @@ describe('internal-plugin-metrics', () => {
             });
 
             assert.notCalled(submitToCallDiagnosticsStub);
-            assert.neverCalledWithMatch(webex.logger.log,
+            assert.neverCalledWithMatch(
+              webex.logger.log,
               'call-diagnostic-events -> ',
               sinon.match(createEventLimitRegex(name, 'mediaType video'))
             );
@@ -2630,7 +3019,7 @@ describe('internal-plugin-metrics', () => {
             // Send event with different shareInstanceId
             cd.submitClientEvent({
               name,
-              payload: { ...payload, shareInstanceId: 'instance-2' },
+              payload: {...payload, shareInstanceId: 'instance-2'},
               options,
             });
 
@@ -2638,89 +3027,88 @@ describe('internal-plugin-metrics', () => {
           });
         });
 
-        ([
-          ['client.roap-message.received'],
-          ['client.roap-message.sent']
-        ] as const).forEach(([name]) => {
-          it(`should not send third event of same type and not log warning again for ${name}`, () => {
-            const options = {
-              meetingId: fakeMeeting.id,
-            };
-            const payload = {
-              roap: {
-                messageType: 'OFFER' as const,
-              },
-            };
-            const submitToCallDiagnosticsStub = sinon.stub(cd, 'submitToCallDiagnostics');
+        ([['client.roap-message.received'], ['client.roap-message.sent']] as const).forEach(
+          ([name]) => {
+            it(`should not send third event of same type and not log warning again for ${name}`, () => {
+              const options = {
+                meetingId: fakeMeeting.id,
+              };
+              const payload = {
+                roap: {
+                  messageType: 'OFFER' as const,
+                },
+              };
+              const submitToCallDiagnosticsStub = sinon.stub(cd, 'submitToCallDiagnostics');
 
-            // Clear any existing call history to get accurate counts
-            webex.logger.log.resetHistory();
+              // Clear any existing call history to get accurate counts
+              webex.logger.log.resetHistory();
 
-            // Send first event
-            cd.submitClientEvent({
-              name,
-              payload,
-              options,
+              // Send first event
+              cd.submitClientEvent({
+                name,
+                payload,
+                options,
+              });
+
+              assert.calledOnce(submitToCallDiagnosticsStub);
+              submitToCallDiagnosticsStub.resetHistory();
+
+              // Send second event (should trigger warning)
+              cd.submitClientEvent({
+                name,
+                payload,
+                options,
+              });
+
+              assert.notCalled(submitToCallDiagnosticsStub);
+              assert.calledWith(
+                webex.logger.log,
+                'call-diagnostic-events -> ',
+                sinon.match(createEventLimitRegex(name, 'ROAP type OFFER'))
+              );
+              webex.logger.log.resetHistory();
+
+              cd.submitClientEvent({
+                name,
+                payload,
+                options,
+              });
+
+              assert.notCalled(submitToCallDiagnosticsStub);
+              assert.neverCalledWithMatch(
+                webex.logger.log,
+                'call-diagnostic-events -> ',
+                sinon.match(createEventLimitRegex(name, 'ROAP type OFFER'))
+              );
             });
 
-            assert.calledOnce(submitToCallDiagnosticsStub);
-            submitToCallDiagnosticsStub.resetHistory();
+            it(`should handle roap.type instead of roap.messageType for ${name}`, () => {
+              const options = {
+                meetingId: fakeMeeting.id,
+              };
+              const payload = {
+                roap: {
+                  type: 'ANSWER' as const,
+                },
+              };
+              const submitToCallDiagnosticsStub = sinon.stub(cd, 'submitToCallDiagnostics');
 
-            // Send second event (should trigger warning)
-            cd.submitClientEvent({
-              name,
-              payload,
-              options,
+              cd.submitClientEvent({
+                name,
+                payload,
+                options,
+              });
+
+              cd.submitClientEvent({
+                name,
+                payload,
+                options,
+              });
+
+              assert.calledOnce(submitToCallDiagnosticsStub);
             });
-
-            assert.notCalled(submitToCallDiagnosticsStub);
-            assert.calledWith(
-              webex.logger.log,
-              'call-diagnostic-events -> ',
-              sinon.match(createEventLimitRegex(name, 'ROAP type OFFER'))
-            );
-            webex.logger.log.resetHistory();
-            
-            cd.submitClientEvent({
-              name,
-              payload,
-              options,
-            });
-
-            assert.notCalled(submitToCallDiagnosticsStub);
-            assert.neverCalledWithMatch(
-              webex.logger.log,
-              'call-diagnostic-events -> ',
-              sinon.match(createEventLimitRegex(name, 'ROAP type OFFER'))
-            );
-          });
-
-          it(`should handle roap.type instead of roap.messageType for ${name}`, () => {
-            const options = {
-              meetingId: fakeMeeting.id,
-            };
-            const payload = {
-              roap: {
-                type: 'ANSWER' as const,
-              },
-            };
-            const submitToCallDiagnosticsStub = sinon.stub(cd, 'submitToCallDiagnostics');
-
-            cd.submitClientEvent({
-              name,
-              payload,
-              options,
-            });
-
-            cd.submitClientEvent({
-              name,
-              payload,
-              options,
-            });
-
-            assert.calledOnce(submitToCallDiagnosticsStub);
-          });
-        });
+          }
+        );
       });
     });
 
@@ -2731,7 +3119,11 @@ describe('internal-plugin-metrics', () => {
         cd.callDiagnosticEventsBatcher = {request: requestStub};
         //@ts-ignore
         cd.submitToCallDiagnostics({event: 'test'});
-        assert.calledWith(requestStub, {eventPayload: {event: 'test'}, type: ['diagnostic-event']});
+        assert.calledWith(requestStub, {
+          eventPayload: {event: 'test'},
+          type: ['diagnostic-event'],
+          markTelemetryOptOutOnResponse: true,
+        });
       });
     });
 
@@ -2784,6 +3176,7 @@ describe('internal-plugin-metrics', () => {
               orgId: 'orgId',
               locusUrl: 'locus/url',
               locusId: 'url',
+              locusSessionId: 'locusSessionId',
               locusStartTime: 'lastActive',
             },
             eventData: {webClientDomain: 'whatever'},
@@ -2799,6 +3192,7 @@ describe('internal-plugin-metrics', () => {
               mediaEngineSoftwareVersion: getOSVersion() || 'unknown',
               startTime: now.toISOString(),
             },
+            webexSubServiceType: undefined,
           },
           options
         );
@@ -2823,6 +3217,7 @@ describe('internal-plugin-metrics', () => {
                 orgId: 'orgId',
                 locusUrl: 'locus/url',
                 locusId: 'url',
+                locusSessionId: 'locusSessionId',
                 locusStartTime: 'lastActive',
               },
               eventData: {webClientDomain: 'whatever'},
@@ -2838,6 +3233,7 @@ describe('internal-plugin-metrics', () => {
                 mediaEngineSoftwareVersion: getOSVersion() || 'unknown',
                 startTime: now.toISOString(),
               },
+              webexSubServiceType: undefined,
             },
           },
         });
@@ -2860,6 +3256,7 @@ describe('internal-plugin-metrics', () => {
               orgId: 'orgId',
               locusUrl: 'locus/url',
               locusId: 'url',
+              locusSessionId: 'locusSessionId',
               locusStartTime: 'lastActive',
             },
             eventData: {webClientDomain: 'whatever'},
@@ -2875,8 +3272,46 @@ describe('internal-plugin-metrics', () => {
               mediaEngineSoftwareVersion: getOSVersion() || 'unknown',
               startTime: now.toISOString(),
             },
+            webexSubServiceType: undefined,
           },
         });
+      });
+
+      it('includes webexSubServiceType in the media quality event payload', () => {
+        const meeting = {
+          ...fakeMeeting,
+          meetingInfo: {
+            enableConvergedArchitecture: true,
+            enableEvent: true,
+            enableConvergedWebinarLargeScale: true,
+          },
+        };
+        const prepareDiagnosticEventSpy = sinon.spy(cd, 'prepareDiagnosticEvent');
+        sinon.stub(cd, 'getOrigin').returns({origin: 'fake-origin'});
+        webex.meetings.getBasicMeetingInformation = sinon.stub().returns(meeting);
+
+        const options = {
+          networkType: 'wifi' as const,
+          meetingId: fakeMeeting.id,
+        };
+
+        cd.submitMQE({
+          name: 'client.mediaquality.event',
+          payload: {
+            //@ts-ignore
+            intervals: [{}],
+          },
+          options,
+        });
+
+        assert.calledOnceWithExactly(
+          prepareDiagnosticEventSpy,
+          sinon.match({
+            name: 'client.mediaquality.event',
+            webexSubServiceType: 'LargeScaleWebinar',
+          }),
+          options
+        );
       });
 
       it('throws if meeting id not provided', () => {
@@ -3599,6 +4034,97 @@ describe('internal-plugin-metrics', () => {
       });
     });
 
+    describe('#getTelemetryOptOut', () => {
+      it('returns "manual" when manual telemetry opt-out is enabled', () => {
+        cd.setIsTelemetryOptOutManual(true);
+        assert.equal(cd.getTelemetryOptOut(), 'manual');
+      });
+
+      it('returns "automatic" when automatic telemetry opt-out is enabled', () => {
+        cd.setIsTelemetryOptOutAutomatic(true);
+        assert.equal(cd.getTelemetryOptOut(), 'automatic');
+      });
+
+      it('returns "manual" when manual opt-out takes precedence over automatic', () => {
+        cd.setIsTelemetryOptOutManual(true);
+        cd.setIsTelemetryOptOutAutomatic(true);
+        assert.equal(cd.getTelemetryOptOut(), 'manual');
+      });
+
+      it('returns undefined when neither manual nor automatic opt-out is set', () => {
+        assert.isUndefined(cd.getTelemetryOptOut());
+      });
+
+      it('returns undefined after disabling manual opt-out', () => {
+        cd.setIsTelemetryOptOutManual(true);
+        cd.setIsTelemetryOptOutManual(false);
+        assert.isUndefined(cd.getTelemetryOptOut());
+      });
+    });
+
+    describe('#setIsTelemetryOptOutManual', () => {
+      it('sets manual telemetry opt-out to true', () => {
+        cd.setIsTelemetryOptOutManual(true);
+        assert.equal(cd.getTelemetryOptOut(), 'manual');
+      });
+
+      it('sets manual telemetry opt-out to false', () => {
+        cd.setIsTelemetryOptOutManual(true);
+        cd.setIsTelemetryOptOutManual(false);
+        assert.isUndefined(cd.getTelemetryOptOut());
+      });
+
+      it('can toggle manual telemetry opt-out multiple times', () => {
+        cd.setIsTelemetryOptOutManual(true);
+        assert.equal(cd.getTelemetryOptOut(), 'manual');
+
+        cd.setIsTelemetryOptOutManual(false);
+        assert.isUndefined(cd.getTelemetryOptOut());
+
+        cd.setIsTelemetryOptOutManual(true);
+        assert.equal(cd.getTelemetryOptOut(), 'manual');
+      });
+
+      it('manual opt-out takes precedence when automatic is also set', () => {
+        cd.setIsTelemetryOptOutAutomatic(true);
+        cd.setIsTelemetryOptOutManual(true);
+        assert.equal(cd.getTelemetryOptOut(), 'manual');
+      });
+    });
+
+    describe('#setIsTelemetryOptOutAutomatic', () => {
+      it('sets automatic telemetry opt-out to true', () => {
+        cd.setIsTelemetryOptOutAutomatic(true);
+        assert.equal(cd.getTelemetryOptOut(), 'automatic');
+      });
+
+      it('sets automatic telemetry opt-out to false', () => {
+        cd.setIsTelemetryOptOutAutomatic(true);
+        cd.setIsTelemetryOptOutAutomatic(false);
+        assert.isUndefined(cd.getTelemetryOptOut());
+      });
+
+      it('can toggle automatic telemetry opt-out multiple times', () => {
+        cd.setIsTelemetryOptOutAutomatic(true);
+        assert.equal(cd.getTelemetryOptOut(), 'automatic');
+
+        cd.setIsTelemetryOptOutAutomatic(false);
+        assert.isUndefined(cd.getTelemetryOptOut());
+
+        cd.setIsTelemetryOptOutAutomatic(true);
+        assert.equal(cd.getTelemetryOptOut(), 'automatic');
+      });
+
+      it('does not override manual opt-out', () => {
+        cd.setIsTelemetryOptOutManual(true);
+        cd.setIsTelemetryOptOutAutomatic(true);
+        assert.equal(cd.getTelemetryOptOut(), 'manual');
+
+        cd.setIsTelemetryOptOutAutomatic(false);
+        assert.equal(cd.getTelemetryOptOut(), 'manual');
+      });
+    });
+
     describe('#getSubServiceType', () => {
       it('returns subServicetype as PMR when PMR meeting', () => {
         fakeMeeting.meetingInfo = {
@@ -3646,6 +4172,15 @@ describe('internal-plugin-metrics', () => {
           enableConvergedArchitecture: true,
         };
         assert.deepEqual(cd.getSubServiceType(fakeMeeting), 'Webcast');
+      });
+
+      it('returns subServicetype as LargeScaleWebinar when meeting is converged Webinar and enable large scale', () => {
+        fakeMeeting.meetingInfo = {
+          enableEvent: true,
+          enableConvergedArchitecture: true,
+          enableConvergedWebinarLargeScale: true,
+        };
+        assert.deepEqual(cd.getSubServiceType(fakeMeeting), 'LargeScaleWebinar');
       });
 
       it('returns subServicetype as undefined when correct parameters are not found', () => {
@@ -3701,18 +4236,22 @@ describe('internal-plugin-metrics', () => {
                       correlationId: 'correlationId',
                       deviceId: 'deviceUrl',
                       locusId: 'url',
+                      locusSessionId: 'locusSessionId',
                       locusStartTime: 'lastActive',
                       locusUrl: 'locus/url',
                       orgId: 'orgId',
                       userId: 'userId',
                     },
                     loginType: 'login-ci',
+                    telemetryOptOut: undefined,
                     name: 'client.exit.app',
                     trigger: 'user-interaction',
                     userType: 'host',
                     isConvergedArchitectureEnabled: undefined,
                     webexSubServiceType: undefined,
                     webClientPreload: undefined,
+                    isVipMeeting: false,
+                    isAutomatedUser: false,
                   },
                   eventId: 'my-fake-id',
                   origin: {
@@ -3880,7 +4419,11 @@ describe('internal-plugin-metrics', () => {
         cd.submitToCallDiagnosticsPreLogin({event: 'test'}, preLoginId);
         //@ts-ignore
         assert.calledWith(cd.preLoginMetricsBatcher.savePreLoginId, preLoginId);
-        assert.calledWith(requestStub, {eventPayload: {event: 'test'}, type: ['diagnostic-event']});
+        assert.calledWith(requestStub, {
+          eventPayload: {event: 'test'},
+          type: ['diagnostic-event'],
+          markTelemetryOptOutOnResponse: true,
+        });
       });
     });
 
@@ -4081,12 +4624,14 @@ describe('internal-plugin-metrics', () => {
           payload: {
             meetingSummaryInfo: {
               featureName: 'syncSystemMuteStatus',
-              featureActions: [{
-                actionName: 'syncMeetingMicUnmuteStatusToSystem',
-                actionId: '14200',
-                isInitialValue: false,
-                clickCount: '1'
-              }]
+              featureActions: [
+                {
+                  actionName: 'syncMeetingMicUnmuteStatusToSystem',
+                  actionId: '14200',
+                  isInitialValue: false,
+                  clickCount: '1',
+                },
+              ],
             },
           },
           options,
@@ -4104,24 +4649,30 @@ describe('internal-plugin-metrics', () => {
               orgId: 'orgId',
               locusUrl: 'locus/url',
               locusId: 'url',
+              locusSessionId: 'locusSessionId',
               locusStartTime: 'lastActive',
             },
-            eventData: { webClientDomain: 'whatever'},
+            eventData: {webClientDomain: 'whatever'},
             userType: 'host',
             loginType: 'login-ci',
+            telemetryOptOut: undefined,
             isConvergedArchitectureEnabled: undefined,
             webexSubServiceType: undefined,
             webClientPreload: undefined,
+            isVipMeeting: false,
+            isAutomatedUser: false,
             meetingSummaryInfo: {
               featureName: 'syncSystemMuteStatus',
-              featureActions: [{
-                actionName: 'syncMeetingMicUnmuteStatusToSystem',
-                actionId: '14200',
-                isInitialValue: false,
-                clickCount: '1'
-              }]
+              featureActions: [
+                {
+                  actionName: 'syncMeetingMicUnmuteStatusToSystem',
+                  actionId: '14200',
+                  isInitialValue: false,
+                  clickCount: '1',
+                },
+              ],
             },
-            key: "UcfFeatureUsage",
+            key: 'UcfFeatureUsage',
           },
           options
         );
@@ -4134,32 +4685,38 @@ describe('internal-plugin-metrics', () => {
           },
           event: {
             canProceed: true,
-            eventData: { webClientDomain: 'whatever'},
+            eventData: {webClientDomain: 'whatever'},
             identifiers: {
               correlationId: 'correlationId',
               deviceId: 'deviceUrl',
               locusId: 'url',
               locusStartTime: 'lastActive',
               locusUrl: 'locus/url',
+              locusSessionId: 'locusSessionId',
               orgId: 'orgId',
               userId: 'userId',
             },
             loginType: 'login-ci',
+            telemetryOptOut: undefined,
             name: 'client.feature.meeting.summary',
             userType: 'host',
             isConvergedArchitectureEnabled: undefined,
             webexSubServiceType: undefined,
             webClientPreload: undefined,
+            isVipMeeting: false,
+            isAutomatedUser: false,
             meetingSummaryInfo: {
               featureName: 'syncSystemMuteStatus',
-              featureActions: [{
-                actionName: 'syncMeetingMicUnmuteStatusToSystem',
-                actionId: '14200',
-                isInitialValue: false,
-                clickCount: '1'
-              }]
+              featureActions: [
+                {
+                  actionName: 'syncMeetingMicUnmuteStatusToSystem',
+                  actionId: '14200',
+                  isInitialValue: false,
+                  clickCount: '1',
+                },
+              ],
             },
-            key: "UcfFeatureUsage",
+            key: 'UcfFeatureUsage',
           },
           originTime: {
             sent: 'not_defined_yet',
@@ -4200,12 +4757,14 @@ describe('internal-plugin-metrics', () => {
           payload: {
             meetingSummaryInfo: {
               featureName: 'syncSystemMuteStatus',
-              featureActions: [{
-                actionName: 'syncMeetingMicUnmuteStatusToSystem',
-                actionId: '14200',
-                isInitialValue: false,
-                clickCount: '1'
-              }]
+              featureActions: [
+                {
+                  actionName: 'syncMeetingMicUnmuteStatusToSystem',
+                  actionId: '14200',
+                  isInitialValue: false,
+                  clickCount: '1',
+                },
+              ],
             },
           },
           delaySubmitEvent: true,
@@ -4217,12 +4776,14 @@ describe('internal-plugin-metrics', () => {
           payload: {
             meetingSummaryInfo: {
               featureName: 'syncSystemVideoStatus',
-              featureActions: [{
-                actionName: 'syncMeetingVideoUnmuteStatusToSystem',
-                actionId: '13400',
-                isInitialValue: false,
-                clickCount: '1'
-              }]
+              featureActions: [
+                {
+                  actionName: 'syncMeetingVideoUnmuteStatusToSystem',
+                  actionId: '13400',
+                  isInitialValue: false,
+                  clickCount: '1',
+                },
+              ],
             },
           },
           delaySubmitEvent: true,
@@ -4240,12 +4801,14 @@ describe('internal-plugin-metrics', () => {
           payload: {
             meetingSummaryInfo: {
               featureName: 'syncSystemMuteStatus',
-              featureActions: [{
-                actionName: 'syncMeetingMicUnmuteStatusToSystem',
-                actionId: '14200',
-                isInitialValue: false,
-                clickCount: '1'
-              }]
+              featureActions: [
+                {
+                  actionName: 'syncMeetingMicUnmuteStatusToSystem',
+                  actionId: '14200',
+                  isInitialValue: false,
+                  clickCount: '1',
+                },
+              ],
             },
           },
           options: {
@@ -4258,12 +4821,14 @@ describe('internal-plugin-metrics', () => {
           payload: {
             meetingSummaryInfo: {
               featureName: 'syncSystemVideoStatus',
-              featureActions: [{
-                actionName: 'syncMeetingVideoUnmuteStatusToSystem',
-                actionId: '13400',
-                isInitialValue: false,
-                clickCount: '1'
-              }]
+              featureActions: [
+                {
+                  actionName: 'syncMeetingVideoUnmuteStatusToSystem',
+                  actionId: '13400',
+                  isInitialValue: false,
+                  clickCount: '1',
+                },
+              ],
             },
           },
           options: {
@@ -4287,17 +4852,17 @@ describe('internal-plugin-metrics', () => {
 
       it('should clear event limits for specific correlationId only', () => {
         // Use the actual correlationIds from our fakeMeeting fixtures
-        const correlationId1 = fakeMeeting.correlationId;   // e.g. 'correlationId1'
-        const correlationId2 = fakeMeeting2.correlationId;  // e.g. 'correlationId2'
-        const options1 = { meetingId: fakeMeeting.id };
-        const options2 = { meetingId: fakeMeeting2.id };
-        const payload = { mediaType: 'video' as const };
+        const correlationId1 = fakeMeeting.correlationId; // e.g. 'correlationId1'
+        const correlationId2 = fakeMeeting2.correlationId; // e.g. 'correlationId2'
+        const options1 = {meetingId: fakeMeeting.id};
+        const options2 = {meetingId: fakeMeeting2.id};
+        const payload = {mediaType: 'video' as const};
 
         // Set up events for both correlations to trigger limits
-        cd.submitClientEvent({ name: 'client.media.render.start', payload, options: options1 });
-        cd.submitClientEvent({ name: 'client.media.render.start', payload, options: options2 });
-        cd.submitClientEvent({ name: 'client.media.render.start', payload, options: options1 });
-        cd.submitClientEvent({ name: 'client.media.render.start', payload, options: options2 });
+        cd.submitClientEvent({name: 'client.media.render.start', payload, options: options1});
+        cd.submitClientEvent({name: 'client.media.render.start', payload, options: options2});
+        cd.submitClientEvent({name: 'client.media.render.start', payload, options: options1});
+        cd.submitClientEvent({name: 'client.media.render.start', payload, options: options2});
         assert.isTrue(cd.eventLimitTracker.size > 0);
         assert.isTrue(cd.eventLimitWarningsLogged.size > 0);
 
@@ -4308,17 +4873,17 @@ describe('internal-plugin-metrics', () => {
         const remainingWarningKeys = Array.from(cd.eventLimitWarningsLogged.keys());
 
         // Should have no keys with correlationId1
-        assert.isFalse(remainingTrackerKeys.some(key => key.split(':')[1] === correlationId1));
-        assert.isFalse(remainingWarningKeys.some(key => key.split(':')[1] === correlationId1));
+        assert.isFalse(remainingTrackerKeys.some((key) => key.split(':')[1] === correlationId1));
+        assert.isFalse(remainingWarningKeys.some((key) => key.split(':')[1] === correlationId1));
 
         // Should still have keys with correlationId2
-        assert.isTrue(remainingTrackerKeys.some(key => key.split(':')[1] === correlationId2));
-        assert.isTrue(remainingWarningKeys.some(key => key.split(':')[1] === correlationId2));
+        assert.isTrue(remainingTrackerKeys.some((key) => key.split(':')[1] === correlationId2));
+        assert.isTrue(remainingWarningKeys.some((key) => key.split(':')[1] === correlationId2));
       });
 
       it('should handle empty correlationId gracefully', () => {
-        const options = { meetingId: fakeMeeting.id };
-        const payload = { mediaType: 'video' as const };
+        const options = {meetingId: fakeMeeting.id};
+        const payload = {mediaType: 'video' as const};
 
         // Set up some tracking data
         cd.submitClientEvent({
@@ -4346,8 +4911,8 @@ describe('internal-plugin-metrics', () => {
       });
 
       it('should handle non-existent correlationId gracefully', () => {
-        const options = { meetingId: fakeMeeting.id };
-        const payload = { mediaType: 'video' as const };
+        const options = {meetingId: fakeMeeting.id};
+        const payload = {mediaType: 'video' as const};
 
         // Set up some tracking data
         cd.submitClientEvent({
@@ -4368,10 +4933,10 @@ describe('internal-plugin-metrics', () => {
 
       it('should clear multiple event types for the same correlationId', () => {
         const correlationId = fakeMeeting.correlationId;
-        const options = { meetingId: fakeMeeting.id };
-        const videoPayload = { mediaType: 'video' as const };
-        const audioPayload = { mediaType: 'audio' as const };
-        const roapPayload = { roap: { messageType: 'OFFER' as const } };
+        const options = {meetingId: fakeMeeting.id};
+        const videoPayload = {mediaType: 'video' as const};
+        const audioPayload = {mediaType: 'audio' as const};
+        const roapPayload = {roap: {messageType: 'OFFER' as const}};
 
         // Set up multiple event types for the same correlation
         cd.submitClientEvent({
@@ -4424,8 +4989,8 @@ describe('internal-plugin-metrics', () => {
 
       it('should allow events to be sent again after clearing limits for correlationId', () => {
         const correlationId = fakeMeeting.correlationId;
-        const options = { meetingId: fakeMeeting.id };
-        const payload = { mediaType: 'video' as const };
+        const options = {meetingId: fakeMeeting.id};
+        const payload = {mediaType: 'video' as const};
         const submitToCallDiagnosticsStub = sinon.stub(cd, 'submitToCallDiagnostics');
 
         // Send first event (should succeed)

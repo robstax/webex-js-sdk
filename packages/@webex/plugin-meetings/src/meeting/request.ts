@@ -26,6 +26,7 @@ import {
   SEND_DTMF_ENDPOINT,
   _SLIDES_,
   ANNOTATION,
+  INTERPRETATION,
 } from '../constants';
 import {
   SendReactionOptions,
@@ -33,6 +34,7 @@ import {
   ToggleReactionsOptions,
   PostMeetingDataConsentOptions,
   SynchronizeVideoLayout,
+  fetchDataChannelTokenOptions,
 } from './request.type';
 import MeetingUtil from './util';
 import {AnnotationInfo} from '../annotation/annotation.types';
@@ -134,6 +136,7 @@ export default class MeetingRequest extends StatelessWebexPlugin {
     locale?: string;
     deviceCapabilities?: Array<string>;
     liveAnnotationSupported: boolean;
+    enableSimultaneousInterpretation: boolean;
     alias?: string;
     clientMediaPreferences: ClientMediaPreferences;
   }) {
@@ -157,6 +160,7 @@ export default class MeetingRequest extends StatelessWebexPlugin {
       locale,
       deviceCapabilities = [],
       liveAnnotationSupported,
+      enableSimultaneousInterpretation,
       clientMediaPreferences,
       alias,
     } = options;
@@ -191,6 +195,14 @@ export default class MeetingRequest extends StatelessWebexPlugin {
     }
     if (liveAnnotationSupported) {
       deviceCapabilities.push(ANNOTATION.ANNOTATION_ON_SHARE_SUPPORTED);
+    }
+    if (enableSimultaneousInterpretation) {
+      deviceCapabilities.push(
+        INTERPRETATION.CAPABILITIES.HOST_CONTROL_SI_SUPPORTED,
+        INTERPRETATION.CAPABILITIES.INTERPRETER_CONTROL_SI_SUPPORTED,
+        INTERPRETATION.CAPABILITIES.SI_HANDOVER_SUPPORTED,
+        INTERPRETATION.CAPABILITIES.SIGN_INTERPRETER_SUPPORTED
+      );
     }
 
     // append installationId to device config if it exists
@@ -1125,5 +1137,46 @@ export default class MeetingRequest extends StatelessWebexPlugin {
       );
       throw err;
     }
+  }
+
+  /**
+   * Sends a request to retrieve the datachannel authorization token for a participant.
+   *
+   * For regular meeting data channel:
+   *   GET /locus/api/v1/loci/{uuid:lid}/participant/{uuid:pid}/datachannel/token
+   *
+   * For practice session data channel:
+   *   GET /locus/api/v1/loci/{uuid:lid}/participant/{uuid:pid}/practiceSession/datachannel/token
+   *
+   * @param {string} locusUrl - The locus url.
+   * @param {string} requestingParticipantId - The participant UUID.
+   * @param {boolean} [isPracticeSession=false] - Whether to get the practice session token.
+   * @returns {Promise<{datachannelToken: string}>}
+   */
+  public async fetchDatachannelToken({
+    locusUrl,
+    requestingParticipantId,
+    isPracticeSession = false,
+  }: fetchDataChannelTokenOptions) {
+    if (!locusUrl || !requestingParticipantId) {
+      return Promise.reject(new Error('locusUrl and participantId are required'));
+    }
+    const practicePrefix = isPracticeSession ? '/practiceSession' : '';
+
+    const uri = `${locusUrl}/${PARTICIPANT}/${requestingParticipantId}${practicePrefix}/datachannel/token`;
+
+    // @ts-ignore
+    return this.locusDeltaRequest({
+      method: HTTP_VERBS.GET,
+      uri,
+    }).catch((err) => {
+      LoggerProxy.logger.warn(
+        `Meeting:request#fetchDatachannelToken --> Failed to retrieve ${
+          isPracticeSession ? 'practice session ' : ''
+        }datachannel token: ${err?.message || err}`
+      );
+
+      return null;
+    });
   }
 }

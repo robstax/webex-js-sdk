@@ -142,9 +142,11 @@ Media.createMediaConnection = (
     enableExtmap?: boolean;
     turnServerInfo?: TurnServerInfo;
     bundlePolicy?: BundlePolicy;
+    iceTransportPolicy?: RTCIceTransportPolicy;
     iceCandidatesTimeout?: number;
     disableAudioMainDtx?: boolean;
     enableAudioTwcc?: boolean;
+    enableAv1SlidesSupport?: boolean;
     stopIceGatheringAfterFirstRelayCandidate?: boolean;
   }
 ) => {
@@ -156,16 +158,18 @@ Media.createMediaConnection = (
     enableExtmap,
     turnServerInfo,
     bundlePolicy,
+    iceTransportPolicy,
     iceCandidatesTimeout,
     disableAudioMainDtx,
     enableAudioTwcc,
+    enableAv1SlidesSupport,
     stopIceGatheringAfterFirstRelayCandidate,
   } = options;
 
   const iceServers = [];
 
   // we might not have any TURN server if TURN discovery failed or wasn't done or we land on a video mesh node
-  if (turnServerInfo?.urls.length > 0) {
+  if (turnServerInfo && turnServerInfo.urls.length > 0) {
     // TURN-TLS server
     iceServers.push({
       urls: turnServerInfo.urls,
@@ -178,10 +182,15 @@ Media.createMediaConnection = (
     const config: MultistreamConnectionConfig = {
       iceServers,
       disableAudioTwcc: !enableAudioTwcc,
+      enableAV1SlidesSupport: !!enableAv1SlidesSupport,
     };
 
     if (bundlePolicy) {
       config.bundlePolicy = bundlePolicy;
+    }
+
+    if (iceTransportPolicy) {
+      config.iceTransportPolicy = iceTransportPolicy;
     }
 
     if (disableAudioMainDtx !== undefined) {

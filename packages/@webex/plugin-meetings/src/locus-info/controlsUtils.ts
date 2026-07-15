@@ -26,7 +26,9 @@ ControlsUtils.parse = (controls: any) => {
       modifiedBy: ControlsUtils.getId(controls),
       paused: controls.record.paused ? controls.record.paused : false,
       recording: controls.record.recording,
-      lastModified: controls.record.meta.lastModified,
+      lastModified: controls.record.meta?.lastModified,
+      modifiedByServiceAppName: controls.record.meta?.modifiedByServiceAppName,
+      modifiedByServiceAppId: controls.record.meta?.modifiedByServiceAppId,
     };
   }
 
@@ -42,6 +44,7 @@ ControlsUtils.parse = (controls: any) => {
       caption: controls.transcribe.caption,
       spokenLanguage: controls.transcribe.spokenLanguage,
       hesiodLlmId: controls.transcribe.hesiodLlmId,
+      aiSummaryNotification: controls.transcribe.aiSummaryNotification,
     };
   }
 
@@ -207,6 +210,16 @@ ControlsUtils.getControls = (oldControls: any, newControls: any) => {
         current?.transcribe &&
         !isEqual(previous?.transcribe?.hesiodLlmId, current?.transcribe?.hesiodLlmId) &&
         !!(previous?.transcribe?.hesiodLlmId || current?.transcribe?.hesiodLlmId),
+
+      hasAiSummaryNotificationChanged:
+        current?.transcribe &&
+        !isEqual(
+          previous?.transcribe?.aiSummaryNotification,
+          current?.transcribe?.aiSummaryNotification
+        ) &&
+        !!(
+          previous?.transcribe?.aiSummaryNotification || current?.transcribe?.aiSummaryNotification
+        ),
 
       hasTranscribeSpokenLanguageChanged:
         current?.transcribe &&

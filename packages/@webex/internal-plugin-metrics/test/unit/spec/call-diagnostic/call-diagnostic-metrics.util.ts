@@ -311,7 +311,7 @@ describe('internal-plugin-metrics', () => {
           origin: {
             buildType: 'prod',
             networkType: 'unknown',
-            upgradeChannel: expectedUpgradeChannel
+            upgradeChannel: expectedUpgradeChannel,
           },
           event: {name: eventName, ...expectedEvent},
         },
@@ -393,7 +393,7 @@ describe('internal-plugin-metrics', () => {
             totalJmt: undefined,
             clientJmt: undefined,
             downloadTime: undefined,
-            clickToInterstitialWithUserDelay:   undefined,
+            clickToInterstitialWithUserDelay: undefined,
             totalJMTWithUserDelay: undefined,
           },
         },
@@ -430,7 +430,6 @@ describe('internal-plugin-metrics', () => {
             totalMediaJMT: undefined,
             interstitialToMediaOKJMT: undefined,
             callInitMediaEngineReady: undefined,
-            stayLobbyTime: undefined,
             totalMediaJMTWithUserDelay: undefined,
             totalJMTWithUserDelay: undefined,
           },
@@ -447,10 +446,45 @@ describe('internal-plugin-metrics', () => {
           },
         },
       ],
+      [
+        'client.lobby.exited',
+        {
+          joinTimes: {
+            stayLobbyTime: undefined,
+          },
+        },
+      ],
     ].forEach(([eventName, expectedEvent]) => {
       it(`returns expected result for ${eventName}`, () => {
         check(eventName as string, expectedEvent, 'gold');
       });
+    });
+
+    it('logs a Milestone entry when event name is present', () => {
+      const logSpy = sinon.spy(webex.logger, 'log');
+      const eventName = 'client.call.initiated';
+      const eventPayload = {event: {name: eventName}};
+
+      prepareDiagnosticMetricItem(webex, {eventPayload, type: ['diagnostic-event']});
+
+      assert.isTrue(
+        logSpy.calledWith('Milestone,CallDiagnostic', eventName),
+        'expected logger.log to be called with Milestone,CallDiagnostic and the event name'
+      );
+      sinon.restore();
+    });
+
+    it('does not log a Milestone entry when event name is absent', () => {
+      const logSpy = sinon.spy(webex.logger, 'log');
+      const eventPayload = {event: {}};
+
+      prepareDiagnosticMetricItem(webex, {eventPayload, type: ['diagnostic-event']});
+
+      assert.isFalse(
+        logSpy.calledWith('Milestone,CallDiagnostic', sinon.match.any),
+        'expected logger.log not to be called with Milestone,CallDiagnostic when event name is absent'
+      );
+      sinon.restore();
     });
 
     it('sets buildType and upgradeChannel correctly', () => {

@@ -82,16 +82,17 @@ export default {
     enableExtmap: false,
     enableAutomaticLLM: false,
     installedOrgID: undefined,
+    multipartSitePrefixList: ['.my.', '.mydmz.', '.mybts.', '.mydev.', '.myats2.', '.myats.'],
     experimental: {
       enableMediaNegotiatedEvent: false,
       enableUnifiedMeetings: true,
       enableAdhocMeetings: true,
-      enableTcpReachability: false,
-      enableTlsReachability: false,
+      storeLocusHashTreeEventsForDebugging: false,
     },
     degradationPreferences: {
       maxMacroblocksLimit: 8192,
     },
+    enableAv1SlidesSupport: false,
     // This only applies to non-multistream meetings
     iceCandidatesGatheringTimeout: undefined,
     backendIpv6NativeSupport: false,
@@ -101,5 +102,8 @@ export default {
     stopIceGatheringAfterFirstRelayCandidate: false,
     enableAudioTwccForMultistream: false,
     enablePerUdpUrlReachability: false, // true: separate peer connection per each UDP URL; false: single peer connection for all URLs
+    locus: {
+      excludedDataSets: ['attendees'], // attendees data set only applies to webinar attendees and we never really need that
+    },
   },
 };

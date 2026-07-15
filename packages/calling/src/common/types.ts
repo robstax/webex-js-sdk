@@ -7,6 +7,7 @@ export type SettingEnabled = boolean;
 export enum ALLOWED_SERVICES {
   MOBIUS = 'mobius',
   JANUS = 'janus',
+  HYDRA_DEVELOPER_API = 'hydraDeveloperApi',
 }
 export enum HTTP_METHODS {
   GET = 'GET',
@@ -75,6 +76,7 @@ export type Digit = string | number;
 export type ServerInfo = {
   region: string;
   uris: string[];
+  wss?: string[];
 };
 
 export type MobiusServers = {
@@ -96,6 +98,11 @@ export type DeviceType = {
   clientDeviceUri: string;
 };
 
+export type Devices = {
+  userId: string;
+  devices: DeviceType[];
+};
+
 export type RegionInfo = {
   countryCode: string;
   clientRegion: string;
@@ -104,7 +111,6 @@ export type RegionInfo = {
 export interface IDeviceInfo {
   userId?: string;
   errorCode?: number;
-
   device?: DeviceType;
   devices?: DeviceType[];
   keepaliveInterval?: number;
@@ -263,6 +269,8 @@ export interface SCIMListResponse {
 export enum WorkerMessageType {
   START_KEEPALIVE = 'START_KEEPALIVE',
   CLEAR_KEEPALIVE = 'CLEAR_KEEPALIVE',
+  SEND_KEEPALIVE = 'SEND_KEEPALIVE',
+  KEEPALIVE_RESULT = 'KEEPALIVE_RESULT',
   KEEPALIVE_SUCCESS = 'KEEPALIVE_SUCCESS',
   KEEPALIVE_FAILURE = 'KEEPALIVE_FAILURE',
 }

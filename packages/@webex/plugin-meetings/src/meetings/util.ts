@@ -1,12 +1,16 @@
 /* globals window */
 
+import {CapabilityState, WebCapabilities} from '@webex/web-capabilities';
 import {
+  _CALL_,
   _CREATED_,
   _INCOMING_,
   _JOINED_,
   _LEFT_,
   DESTINATION_TYPE,
   _MOVED_,
+  _SIP_BRIDGE_,
+  _SPACE_SHARE_,
   BREAKOUTS,
   EVENT_TRIGGERS,
   LOCUS,
@@ -18,6 +22,7 @@ import Trigger from '../common/events/trigger-proxy';
 import BEHAVIORAL_METRICS from '../metrics/constants';
 import Metrics from '../metrics';
 import {MEETING_KEY} from './meetings.types';
+import {EndMeetingReason, LocusFullState} from '../locus-info/types';
 
 /**
  * Meetings Media Codec Missing Event
@@ -152,6 +157,30 @@ MeetingsUtil.parseDefaultSiteFromMeetingPreferences = (userPreferences) => {
   return result;
 };
 
+MeetingsUtil.getSiteName = (site: string, multipartSitePrefixList: string[] = []) => {
+  if (!site) {
+    return null;
+  }
+
+  let siteName: string | undefined;
+
+  multipartSitePrefixList.forEach((multipartSitePrefix) => {
+    if (!siteName && site.includes(multipartSitePrefix)) {
+      const secondDot = site.indexOf('.', site.indexOf('.') + 1);
+
+      siteName = site.substring(0, secondDot);
+    }
+  });
+
+  if (siteName) {
+    return siteName;
+  }
+
+  siteName = site.substring(0, site.indexOf('.'));
+
+  return siteName;
+};
+
 /**
  * Will check to see if the H.264 media codec is supported.
  * @async
@@ -159,20 +188,36 @@ MeetingsUtil.parseDefaultSiteFromMeetingPreferences = (userPreferences) => {
  * @returns {Promise<boolean>}
  */
 MeetingsUtil.hasH264Codec = async () => {
+  try {
+    const codecCapability = WebCapabilities.isCapableOfReceivingVideoCodec('video/H264');
+
+    if (codecCapability === CapabilityState.CAPABLE) {
+      return true;
+    }
+
+    if (codecCapability === CapabilityState.NOT_CAPABLE) {
+      return false;
+    }
+  } catch (_) {
+    // NO-OP
+  }
+
   let hasCodec = false;
 
+  let pc;
   try {
-    const pc = new window.RTCPeerConnection();
+    pc = new window.RTCPeerConnection();
     const offer = await pc.createOffer({offerToReceiveVideo: true});
 
-    if (offer.sdp.match(/^a=rtpmap:\d+\s+H264\/\d+/m)) {
+    if (offer.sdp?.match(/^a=rtpmap:\d+\s+H264\/\d+/m)) {
       hasCodec = true;
     }
-    pc.close();
   } catch (error) {
     LoggerProxy.logger.warn(
       'Meetings:util#hasH264Codec --> Error creating peerConnection for H.264 test.'
     );
+  } finally {
+    pc?.close();
   }
 
   return hasCodec;
@@ -267,6 +312,49 @@ MeetingsUtil.getThisDevice = (newLocus: any, deviceUrl: string) => {
 };
 
 /**
+ * Checks if the fullState indicates the meeting has fully ended (not just a breakout move).
+ * @param {Object} fullState locus fullState data
+ * @returns {boolean}
+ */
+MeetingsUtil.isWholeMeetingEnded = (fullState: LocusFullState): boolean => {
+  return (
+    fullState.state === LOCUS.STATE.INACTIVE &&
+    fullState.endMeetingReason !== EndMeetingReason.breakoutEnded
+  );
+};
+
+/**
+ * Checks if the self state in a locus indicates a breakout move or breakout end.
+ * Returns true when:
+ * - self state is LEFT with reason MOVED (regular breakout move), OR
+ * - fullState is INACTIVE with endMeetingReason BREAKOUT_ENDED (breakout session ended)
+ * @param {Object} locus locus data
+ * @returns {boolean}
+ */
+MeetingsUtil.isSelfMovedOrBreakoutEnded = (locus: any): boolean => {
+  const isSelfLeftMoved = locus?.self?.state === _LEFT_ && locus?.self?.reason === _MOVED_;
+  const isBreakoutEnded =
+    locus?.fullState?.state === LOCUS.STATE.INACTIVE &&
+    locus?.fullState?.endMeetingReason === EndMeetingReason.breakoutEnded;
+
+  return isSelfLeftMoved || isBreakoutEnded;
+};
+
+/**
+ * Checks if a locus is a 1:1 call using locus.fullState.type.
+ * Returns true when fullState.type is CALL, SIP_BRIDGE, or SPACE_SHARE.
+ * @param {Object} locus locus data
+ * @returns {boolean}
+ */
+MeetingsUtil.isOneOnOneCall = (locus: any): boolean => {
+  const fullStateType = locus?.fullState?.type;
+
+  return (
+    fullStateType === _CALL_ || fullStateType === _SIP_BRIDGE_ || fullStateType === _SPACE_SHARE_
+  );
+};
+
+/**
  * get self device joined status from locus data
  * @param {Object} meeting current meeting data
  * @param {Object} newLocus new locus data
@@ -294,7 +382,10 @@ MeetingsUtil.joinedOnThisDevice = (meeting: any, newLocus: any, deviceUrl: strin
  * @private
  */
 MeetingsUtil.isBreakoutLocusDTO = (newLocus: any) => {
-  return newLocus?.controls?.breakout?.sessionType === BREAKOUTS.SESSION_TYPES.BREAKOUT;
+  return (
+    newLocus?.controls?.breakout?.sessionType === BREAKOUTS.SESSION_TYPES.BREAKOUT ||
+    !!newLocus?.info?.isBreakout
+  );
 };
 
 /**
@@ -309,5 +400,27 @@ MeetingsUtil.isValidBreakoutLocus = (locus: any) => {
   const selfJoined = locus.self?.state === _JOINED_;
 
   return isLocusAsBreakout && !inActiveStatus && selfJoined;
+};
+/**
+ * check if the breakout locus is associated with the main locus by comparing the breakout control url or the replaces info in self device
+ * @param {Object} mainLocus main locus data
+ * @param {Object} breakoutLocus breakout locus data
+ * @returns {boolean}
+ * @private
+ */
+MeetingsUtil.isMainAssociatedWithBreakout = (mainLocus: any, breakoutLocus: any) => {
+  if (
+    mainLocus.controls?.breakout?.url &&
+    mainLocus.controls?.breakout?.url === breakoutLocus.controls?.breakout?.url
+  ) {
+    return true;
+  }
+  const deviceUrl = breakoutLocus?.self?.deviceUrl;
+  const replaceInfo = MeetingsUtil.getThisDevice(breakoutLocus, deviceUrl)?.replaces?.[0];
+  if (replaceInfo?.locusUrl && replaceInfo.locusUrl === mainLocus.url) {
+    return true;
+  }
+
+  return false;
 };
 export default MeetingsUtil;

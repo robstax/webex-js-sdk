@@ -44,6 +44,18 @@ const MemberUtil = {
 
   /**
    * @param {Object} participant - The locus participant object.
+   * @returns {Boolean}
+   */
+  canApproveAIEnablement: (participant) => {
+    if (!participant) {
+      return false;
+    }
+
+    return !participant.attendeeRequestAiAssistantNotAllowed;
+  },
+
+  /**
+   * @param {Object} participant - The locus participant object.
    * @returns {[ServerRoleShape]}
    */
   getControlsRoles: (participant: Participant): Array<ServerRoleShape> =>
@@ -127,6 +139,9 @@ const MemberUtil = {
 
   isPresenterAssignmentProhibited: (participant: Participant) =>
     participant && participant.presenterAssignmentNotAllowed,
+
+  isAttendeeAssignmentProhibited: (participant: Participant) =>
+    !!(participant && participant.attendeeAssignmentNotAllowed),
 
   /**
    * checks to see if the participant id is the same as the passed id
@@ -423,6 +438,32 @@ const MemberUtil = {
     });
 
     return participantUrl;
+  },
+
+  /**
+   * Collects all CSIs reported for a participant across all their devices,
+   * looking at both the top-level `csis` array and any `mediaSessions[].csi` values.
+   *
+   * @param {Object} participant - The locus participant object.
+   * @returns {Array<number>} unique CSIs for this participant
+   */
+  extractCsis: (participant: Participant): number[] => {
+    const csis = new Set<number>();
+
+    participant?.devices?.forEach((device: any) => {
+      device?.csis?.forEach((csi: number) => {
+        if (typeof csi === 'number') {
+          csis.add(csi);
+        }
+      });
+      device?.mediaSessions?.forEach((mediaSession: any) => {
+        if (typeof mediaSession?.csi === 'number') {
+          csis.add(mediaSession.csi);
+        }
+      });
+    });
+
+    return Array.from(csis);
   },
 };
 export default MemberUtil;
