@@ -32,6 +32,12 @@ const DEFAULT_CLUSTER_IDENTIFIER =
 const CATALOG_CACHE_KEY_V2 = 'services.v2.u2cHostMap';
 const CATALOG_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
 
+// Maximum time we will wait for the initial catalog collection before letting
+// `services.ready` (and therefore `webex.ready`) fire anyway. A hung request
+// must never leave the app on a permanent spinner - past this point downstream
+// consumers must fall through to their normal error/login paths.
+const SERVICES_INIT_TIMEOUT_MS = 15_000;
+
 /* eslint-disable no-underscore-dangle */
 /**
  * @class
@@ -1352,6 +1358,30 @@ const Services = WebexPlugin.extend({
   },
 
   /**
+   * Await any in-flight credentials refresh, then flip `services.ready` so
+   * `webex.ready` can fire. Closes the parallel-refresh window: if a credential
+   * refresh is in flight when initial catalog collection settles, we must not
+   * signal ready until the refresh has resolved - otherwise downstream
+   * consumers may observe `canAuthorize`/token state that is about to change
+   * under them.
+   *
+   * @private
+   * @returns {Promise<void>}
+   */
+  async _finalizeReady(): Promise<void> {
+    const {credentials} = this.webex;
+
+    if (credentials && credentials.isRefreshing) {
+      await new Promise<void>((resolve) => {
+        credentials.once('change:isRefreshing', resolve);
+      });
+    }
+
+    this.ready = true;
+    this.trigger('services:initialized');
+  },
+
+  /**
    * Initializer
    *
    * @instance
@@ -1367,19 +1397,32 @@ const Services = WebexPlugin.extend({
       this.initConfig();
     });
 
-    // wait for webex instance to be ready before attempting
-    // to update the service catalogs
+    // Wait for storage to be loaded before attempting to update the service catalogs.
+    // We listen for 'loaded' instead of 'ready' because services.ready is a dependency
+    // of webex.ready - listening to 'ready' would cause a deadlock.
     this.listenToOnce(this.webex, 'loaded', async () => {
       const warmed = await this._loadCatalogFromCache();
       if (warmed) {
         catalog.isReady = true;
+        await this._finalizeReady();
 
         return;
       }
       const {supertoken} = this.webex.credentials;
+
+      // Race init against a hard timeout so a hung request never leaves
+      // `services.ready` false forever - that would stall `webex.ready` and
+      // leave the app on a permanent spinner.
+      const timeout = new Promise<never>((_, reject) => {
+        setTimeout(
+          () => reject(new Error(`services: init timed out after ${SERVICES_INIT_TIMEOUT_MS}ms`)),
+          SERVICES_INIT_TIMEOUT_MS
+        );
+      });
+
       // Validate if the supertoken exists.
       if (supertoken && supertoken.access_token) {
-        this.initServiceCatalogs()
+        Promise.race([this.initServiceCatalogs(), timeout])
           .then(() => {
             catalog.isReady = true;
           })
@@ -1389,24 +1432,18 @@ const Services = WebexPlugin.extend({
               `services: failed to init initial services when credentials available, ${error?.message}`
             );
           })
-          .finally(() => {
-            this.ready = true;
-            this.trigger('services:initialized');
-          });
+          .finally(() => this._finalizeReady());
       } else {
         const {email} = this.webex.config;
 
-        this.collectPreauthCatalog(email ? {email} : undefined)
+        Promise.race([this.collectPreauthCatalog(email ? {email} : undefined), timeout])
           .catch((error) => {
             this.initFailed = true;
             this.logger.error(
               `services: failed to init initial services when no credentials available, ${error?.message}`
             );
           })
-          .finally(() => {
-            this.ready = true;
-            this.trigger('services:initialized');
-          });
+          .finally(() => this._finalizeReady());
         // Listen for when credentials become available to fetch the full catalog.
         // This handles fresh login where 'loaded' fires before OAuth completes.
         this.listenToOnce(this.webex, 'change:canAuthorize', () => {
