@@ -486,6 +486,80 @@ describe('plugin-meetings', () => {
         MeetingInfoUtil.getDirectMeetingInfoURI.restore();
       });
 
+      forEach(
+        [
+          {
+            routingMethod: 'service-catalog',
+            destination: '1234323',
+            destinationType: DESTINATION_TYPE.MEETING_ID,
+            expectedRequestLocation: {
+              service: WBXAPPAPI_SERVICE,
+              resource: 'meetingInfo',
+            },
+            expectedEventData: {
+              meetingInfoRoutingMethod: 'service-catalog',
+              meetingInfoService: WBXAPPAPI_SERVICE,
+            },
+          },
+          {
+            routingMethod: 'direct-uri',
+            destination: 'example@direct-site.webex.com',
+            destinationType: DESTINATION_TYPE.SIP_URI,
+            expectedRequestLocation: {
+              uri: 'https://direct-site.webex.com/wbxappapi/v1/meetingInfo',
+            },
+            expectedEventData: {
+              meetingInfoRoutingMethod: 'direct-uri',
+              meetingInfoSelectedHost: 'direct-site.webex.com',
+            },
+          },
+          {
+            routingMethod: 'full-site-url',
+            destination: '1234323',
+            destinationType: DESTINATION_TYPE.MEETING_ID,
+            fullSiteUrl: 'full-site.webex.com',
+            expectedRequestLocation: {
+              uri: 'https://full-site.webex.com/wbxappapi/v1/meetingInfo',
+            },
+            expectedEventData: {
+              meetingInfoRoutingMethod: 'full-site-url',
+              meetingInfoSelectedHost: 'full-site.webex.com',
+            },
+          },
+        ],
+        ({
+          routingMethod,
+          destination,
+          destinationType,
+          fullSiteUrl,
+          expectedRequestLocation,
+          expectedEventData,
+        }) => {
+          it(`should report ${routingMethod} meeting info routing`, async () => {
+            webex.request.resolves({statusCode: 200, body: {meetingKey: '1234323'}});
+
+            await meetingInfo.fetchMeetingInfo(
+              destination,
+              destinationType,
+              null,
+              null,
+              null,
+              null,
+              {},
+              {meetingId: 'meeting-id', sendCAevents: true},
+              null,
+              fullSiteUrl
+            );
+
+            assert.include(webex.request.firstCall.args[0], expectedRequestLocation);
+            assert.deepEqual(
+              webex.internal.newMetrics.submitClientEvent.firstCall.args[0].payload.eventData,
+              expectedEventData
+            );
+          });
+        }
+      );
+
       it('should fetch meeting info with provided password and captcha code', async () => {
         const requestResponse = {statusCode: 200, body: {meetingKey: '1234323'}};
 
@@ -764,6 +838,12 @@ describe('plugin-meetings', () => {
 
                 assert.deepEqual(submitClientEventCalls[0].args[0], {
                   name: 'client.meetinginfo.request',
+                  payload: {
+                    eventData: {
+                      meetingInfoRoutingMethod: 'service-catalog',
+                      meetingInfoService: WBXAPPAPI_SERVICE,
+                    },
+                  },
                   options: {
                     meetingId: 'meeting-id',
                   },
@@ -869,6 +949,12 @@ describe('plugin-meetings', () => {
               });
               assert.deepEqual(submitClientEventCalls[0].args[0], {
                 name: 'client.meetinginfo.request',
+                payload: {
+                  eventData: {
+                    meetingInfoRoutingMethod: 'service-catalog',
+                    meetingInfoService: WBXAPPAPI_SERVICE,
+                  },
+                },
                 options: {
                   meetingId,
                 },
@@ -947,6 +1033,12 @@ describe('plugin-meetings', () => {
         });
         assert.deepEqual(submitClientEventCalls[0].args[0], {
           name: 'client.meetinginfo.request',
+          payload: {
+            eventData: {
+              meetingInfoRoutingMethod: 'service-catalog',
+              meetingInfoService: WBXAPPAPI_SERVICE,
+            },
+          },
           options: {
             meetingId: 'meetingId',
           },

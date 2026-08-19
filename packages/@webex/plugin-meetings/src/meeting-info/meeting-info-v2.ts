@@ -269,6 +269,8 @@ export class MeetingInfoV2StaticMeetingLinkAlreadyExists extends Error {
   }
 }
 
+type MeetingInfoRoutingMethod = 'full-site-url' | 'direct-uri' | 'service-catalog';
+
 /**
  * @class MeetingInfo
  */
@@ -707,14 +709,23 @@ export default class MeetingInfoV2 {
     };
 
     const directURI = await MeetingInfoUtil.getDirectMeetingInfoURI(destinationType);
+    let meetingInfoRoutingMethod: MeetingInfoRoutingMethod;
+    let meetingInfoSelectedHost: string;
+    let meetingInfoService: string;
 
     if (fullSiteUrl) {
       requestOptions.uri = `https://${fullSiteUrl}/wbxappapi/v1/meetingInfo`;
+      meetingInfoRoutingMethod = 'full-site-url';
+      meetingInfoSelectedHost = new URL(requestOptions.uri).host;
     } else if (directURI) {
       requestOptions.uri = directURI;
+      meetingInfoRoutingMethod = 'direct-uri';
+      meetingInfoSelectedHost = new URL(requestOptions.uri).host;
     } else {
       requestOptions.service = WBXAPPAPI_SERVICE;
       requestOptions.resource = 'meetingInfo';
+      meetingInfoRoutingMethod = 'service-catalog';
+      meetingInfoService = WBXAPPAPI_SERVICE;
     }
 
     if (meetingId && sendCAevents) {
@@ -724,6 +735,13 @@ export default class MeetingInfoV2 {
 
       this.webex.internal.newMetrics.submitClientEvent({
         name: 'client.meetinginfo.request',
+        payload: {
+          eventData: {
+            meetingInfoRoutingMethod,
+            ...(meetingInfoSelectedHost && {meetingInfoSelectedHost}),
+            ...(meetingInfoService && {meetingInfoService}),
+          },
+        },
         options: {
           meetingId,
         },
