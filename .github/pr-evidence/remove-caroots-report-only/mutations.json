@@ -1,0 +1,35 @@
+{
+  "results": [
+    {
+      "name": "enforcement-disabled",
+      "detected": true,
+      "exitCode": 1
+    },
+    {
+      "name": "enforcement-always-enabled",
+      "detected": true,
+      "exitCode": 1
+    },
+    {
+      "name": "roots-discarded",
+      "detected": true,
+      "exitCode": 1
+    },
+    {
+      "name": "failure-swallowed",
+      "detected": true,
+      "exitCode": 1
+    },
+    {
+      "name": "failure-not-reported",
+      "detected": true,
+      "exitCode": 1
+    },
+    {
+      "name": "wrong-returned-key",
+      "detected": true,
+      "exitCode": 1
+    }
+  ],
+  "restored": true
+}

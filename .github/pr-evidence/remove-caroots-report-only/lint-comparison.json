@@ -1,0 +1,81 @@
+[
+  {
+    "file": "packages/@webex/internal-plugin-encryption/src/config.js",
+    "unchanged": true,
+    "baseErrors": 0,
+    "currentErrors": 0,
+    "baseWarnings": 0,
+    "currentWarnings": 0,
+    "issues": []
+  },
+  {
+    "file": "packages/@webex/internal-plugin-encryption/src/kms.js",
+    "unchanged": true,
+    "baseErrors": 2,
+    "currentErrors": 2,
+    "baseWarnings": 2,
+    "currentWarnings": 2,
+    "issues": [
+      {
+        "ruleId": "@typescript-eslint/no-var-requires",
+        "severity": 1,
+        "message": "Require statement not part of import statement."
+      },
+      {
+        "ruleId": "require-jsdoc",
+        "severity": 1,
+        "message": "Missing JSDoc comment."
+      },
+      {
+        "ruleId": "valid-jsdoc",
+        "severity": 2,
+        "message": "JSDoc syntax error."
+      },
+      {
+        "ruleId": "valid-jsdoc",
+        "severity": 2,
+        "message": "JSDoc syntax error."
+      }
+    ]
+  },
+  {
+    "file": "packages/@webex/internal-plugin-encryption/test/unit/spec/kms.js",
+    "unchanged": true,
+    "baseErrors": 2,
+    "currentErrors": 2,
+    "baseWarnings": 4,
+    "currentWarnings": 4,
+    "issues": [
+      {
+        "ruleId": "import/no-extraneous-dependencies",
+        "severity": 1,
+        "message": "'@webex/test-helper-chai' should be listed in the project's dependencies, not devDependencies."
+      },
+      {
+        "ruleId": "import/no-extraneous-dependencies",
+        "severity": 1,
+        "message": "'@webex/test-helper-mock-webex' should be listed in the project's dependencies, not devDependencies."
+      },
+      {
+        "ruleId": "import/no-extraneous-dependencies",
+        "severity": 1,
+        "message": "'@webex/internal-plugin-encryption' should be listed in the project's dependencies. Run 'npm i -S @webex/internal-plugin-encryption' to add it"
+      },
+      {
+        "ruleId": "@typescript-eslint/no-unused-vars",
+        "severity": 1,
+        "message": "'options' is assigned a value but never used."
+      },
+      {
+        "ruleId": "no-unused-vars",
+        "severity": 2,
+        "message": "'options' is assigned a value but never used."
+      },
+      {
+        "ruleId": "no-bitwise",
+        "severity": 2,
+        "message": "Unexpected use of '^='."
+      }
+    ]
+  }
+]

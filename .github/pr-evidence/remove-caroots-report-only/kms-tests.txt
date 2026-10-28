@@ -1,0 +1,55 @@
+Browserslist: browsers data (caniuse-lite) is 7 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+Browserslist: browsers data (caniuse-lite) is 7 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+PASS test/unit/spec/kms.js
+  internal-plugin-encryption
+    kms
+      key management
+        ✓ listAllCustomerMasterKey (4 ms)
+        ✓ uploadCustomerMasterKey without backup (2 ms)
+        ✓ deleteAllCustomerMasterKeys (1 ms)
+        fetchKey
+          ✓ should fetch key normally when no redirect is needed (1 ms)
+          ✓ should handle redirect when errorCode is 301002 (1 ms)
+          ✓ should not redirect when errorCode is not 301002 (2 ms)
+          ✓ should not redirect when redirectUri is missing (1 ms)
+          ✓ should reject when uri is not provided (2 ms)
+      _validateKMSStaticPubKey
+        ✓ rejects and reports invalid KMS metadata with enforced chain validation enabled (2 ms)
+        ✓ rejects and reports invalid KMS metadata with enforced chain validation disabled (1 ms)
+        ✓ rejects and reports missing KMS metadata (3 ms)
+        ✓ preserves the validation error when metric submission rejects (2 ms)
+        ✓ rejects when enforced chain validation is enabled but no caroots are provided (5 ms)
+        ✓ resolves with no caroots when enforced chain validation is disabled (3 ms)
+        ✓ resolves without a metric when the enforced chain validates (11 ms)
+        ✓ rejects and reports an untrusted chain when enforced chain validation is enabled (4 ms)
+        ✓ resolves an untrusted chain without a metric when enforced chain validation is disabled (2 ms)
+      CA roots
+        _getCaroots
+          ✓ resolves undefined without loading the asset when validation is disabled (2 ms)
+          ✓ prefers configured caroots over the asset (2 ms)
+          ✓ loads and verifies the asset when caroots is undefined (277 ms)
+          ✓ loads and verifies the asset when caroots is [] (257 ms)
+          ✓ caches the verified CA roots (256 ms)
+          ✓ fails closed with an actionable error and retries after a network error (248 ms)
+          ✓ fails closed with an actionable error and retries after an HTTP error (242 ms)
+          ✓ fails closed with an actionable error and retries when the asset fails verification (314 ms)
+          ✓ reports a stale asset but still uses it (246 ms)
+        _getCarootsAssetBytes
+          ✓ reads the asset shipped with the package in Node (7 ms)
+        _prepareContext
+          ✓ validates the KMS key against the resolved CA roots (2 ms)
+        _getContext
+          ✓ retries the negotiation after a failed attempt (1 ms)
+      KMS error
+        ✓ KMSError (2 ms)
+        ✓ includes the Webex tracking ID in KMS timeout errors (1 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       31 passed, 31 total
+Snapshots:   0 total
+Time:        2.577 s, estimated 3 s
+Ran all test suites matching /\/private\/tmp\/webex-js-sdk-remove-caroots-report-only\/packages\/@webex\/internal-plugin-encryption\/test\/unit\/spec\/kms.js/i.

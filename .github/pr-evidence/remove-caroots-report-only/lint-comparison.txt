@@ -1,0 +1,6 @@
+Browserslist: browsers data (caniuse-lite) is 7 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+packages/@webex/internal-plugin-encryption/src/config.js: same findings as base (0 errors, 0 warnings)
+packages/@webex/internal-plugin-encryption/src/kms.js: same findings as base (2 errors, 2 warnings)
+packages/@webex/internal-plugin-encryption/test/unit/spec/kms.js: same findings as base (2 errors, 4 warnings)
