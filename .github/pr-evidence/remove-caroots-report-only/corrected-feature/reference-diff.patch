@@ -1,0 +1,292 @@
+diff --git a/packages/@webex/internal-plugin-encryption/README.md b/packages/@webex/internal-plugin-encryption/README.md
+index 8353e83a2f..be7c3d73f1 100644
+--- a/packages/@webex/internal-plugin-encryption/README.md
++++ b/packages/@webex/internal-plugin-encryption/README.md
+@@ -46,7 +46,7 @@ options on the `encryption` config:
+   using configured `caroots` or the same verified asset. Download, bundle
+   verification and certificate-chain failures are reported without delaying or
+   rejecting KMS setup. Mandatory key/certificate checks still apply. Enforcement
+-  and an explicit `carootsReportOnly` array take precedence over this option.
++  takes precedence over this option.
+ - `caroots` — an array of raw base64-encoded CA root certificates. When set (and
+   non-empty) these are used and nothing is downloaded in either validation
+   mode. Supplying roots alone does not enable validation; select enforcement or
+@@ -63,12 +63,6 @@ options on the `encryption` config:
+   Development builds and builds without either version use
+   `/assets/internal-plugin-encryption/` on the page's origin. Explicit
+   application settings override this default.
+-- `carootsReportOnly` — an additional array of CA roots validated alongside the
+-  enforced roots. A failure here is only reported as a metric instead of failing
+-  the negotiation, which lets a new bundle be trialled in parallel. This also
+-  runs when `shouldValidateKMSCertificate` is `false`. This existing check is
+-  awaited and takes precedence over the new background report-only option;
+-  supplying this array does not request the asset.
+ 
+ ### Where the CA roots come from
+ 
+@@ -103,9 +97,8 @@ const webex = new WebexCore({
+ });
+ ```
+ 
+-When both flags are `true`, enforcement wins and the new report-only option
+-does not add a duplicate check. Explicit `carootsReportOnly` arrays retain their
+-existing additional-check behavior, including when enforcement is enabled.
++When both flags are `true`, enforcement wins and the report-only option
++does not add a duplicate check.
+ 
+ The SDK reports these client metrics:
+ 
+diff --git a/packages/@webex/internal-plugin-encryption/src/config.js b/packages/@webex/internal-plugin-encryption/src/config.js
+index a2eafc5290..f82578c63b 100644
+--- a/packages/@webex/internal-plugin-encryption/src/config.js
++++ b/packages/@webex/internal-plugin-encryption/src/config.js
+@@ -65,8 +65,7 @@ export default {
+     /**
+      * Check the KMS certificate chain in the background using configured roots
+      * or the verified CA roots asset. Failures are reported without delaying or
+-     * rejecting KMS setup. Enforcement and explicit `carootsReportOnly` roots
+-     * take precedence. Disabled by default.
++     * rejecting KMS setup. Enforcement takes precedence. Disabled by default.
+      * @type {boolean}
+      */
+     shouldValidateKMSCertificateReportOnly: false,
+@@ -102,15 +101,5 @@ export default {
+      * @type {string}
+      */
+     assetsBaseUrl: getUmdAssetsBaseUrl('internal-plugin-encryption', SDK_VERSION, PACKAGE_VERSION),
+-
+-    /**
+-     * An additional CA root bundle validated alongside `caroots`. Unlike
+-     * `caroots`, a validation failure against these roots is reported as a
+-     * metric instead of failing the ECDH negotiation. This allows a new CA
+-     * root bundle to be trialled in parallel with the enforced `caroots`
+-     * without risking total failure.
+-     * @type {?string[]}
+-     */
+-    carootsReportOnly: undefined,
+   },
+ };
+diff --git a/packages/@webex/internal-plugin-encryption/src/kms.js b/packages/@webex/internal-plugin-encryption/src/kms.js
+index 3684cfee20..4b8d1a9b91 100644
+--- a/packages/@webex/internal-plugin-encryption/src/kms.js
++++ b/packages/@webex/internal-plugin-encryption/src/kms.js
+@@ -999,19 +999,14 @@ const KMS = WebexPlugin.extend({
+    * Validates the KMS static public key against the CA roots.
+    * Validation is opt-in (`shouldValidateKMSCertificate`) and, when enabled,
+    * fails closed when no CA roots are available or validation fails. Enforced
+-   * failures are reported and rejected. When a `carootsReportOnly` bundle is
+-   * configured, its failures are reported without rejecting.
++   * failures are reported and rejected.
+    * @private
+    * @param {Object} kmsStaticPubKey
+    * @param {?string[]} caroots CA roots resolved by `_getCaroots()`
+    * @returns {Promise<Object>} the KMS static public key
+    */
+   _validateKMSStaticPubKey(kmsStaticPubKey, caroots) {
+-    const {
+-      carootsReportOnly,
+-      shouldValidateKMSCertificate,
+-      shouldValidateKMSCertificateReportOnly,
+-    } = this.config;
++    const {shouldValidateKMSCertificate, shouldValidateKMSCertificateReportOnly} = this.config;
+ 
+     return validateKMS({caroots, validateSignature: shouldValidateKMSCertificate})(kmsStaticPubKey)
+       .catch((reason) => {
+@@ -1019,21 +1014,13 @@ const KMS = WebexPlugin.extend({
+         throw reason;
+       })
+       .then((jwt) => {
+-        if (!carootsReportOnly) {
+-          if (shouldValidateKMSCertificateReportOnly && !shouldValidateKMSCertificate) {
+-            this._reportKMSStaticPubKey(jwt).catch((reason) => {
+-              this.logger.warn('kms: report-only validation task failed', reason);
+-            });
+-          }
+-
+-          return jwt;
++        if (shouldValidateKMSCertificateReportOnly && !shouldValidateKMSCertificate) {
++          this._reportKMSStaticPubKey(jwt).catch((reason) => {
++            this.logger.warn('kms: report-only validation task failed', reason);
++          });
+         }
+ 
+-        return validateKMS({caroots: carootsReportOnly})(kmsStaticPubKey)
+-          .catch((reason) =>
+-            this._reportKMSValidationFailure(kmsStaticPubKey, reason, 'report-only')
+-          )
+-          .then(() => jwt);
++        return jwt;
+       });
+   },
+ 
+diff --git a/packages/@webex/internal-plugin-encryption/test/unit/spec/kms.js b/packages/@webex/internal-plugin-encryption/test/unit/spec/kms.js
+index 4b3f049b5f..8aa28b616d 100644
+--- a/packages/@webex/internal-plugin-encryption/test/unit/spec/kms.js
++++ b/packages/@webex/internal-plugin-encryption/test/unit/spec/kms.js
+@@ -252,7 +252,6 @@ describe('internal-plugin-encryption', () => {
+       beforeEach(() => {
+         webex.internal.metrics = {submitClientMetrics: sinon.stub()};
+         webex.internal.encryption.config.shouldValidateKMSCertificate = true;
+-        webex.internal.encryption.config.carootsReportOnly = undefined;
+       });
+ 
+       // Mandatory metadata checks still reject malformed keys when chain enforcement is disabled.
+@@ -282,6 +281,26 @@ describe('internal-plugin-encryption', () => {
+         });
+       });
+ 
++      it('rejects and reports missing KMS metadata', async () => {
++        await assert.isRejected(
++          webex.internal.encryption.kms._validateKMSStaticPubKey(undefined, caroots),
++          /INVALID KMS/
++        );
++
++        assert.calledOnceWithExactly(
++          webex.internal.metrics.submitClientMetrics,
++          'JS_SDK_KMS_CERTIFICATE_VALIDATION_FAILED',
++          {
++            fields: {success: false},
++            tags: {
++              reason: "INVALID KMS: 'kty' header must be 'RSA'",
++              kid: undefined,
++              validationMode: 'enforced',
++            },
++          }
++        );
++      });
++
+       it('preserves the validation error when metric submission rejects', async () => {
+         const metricError = new Error('clientmetrics request failed');
+         const {warn} = webex.internal.encryption.kms.logger;
+@@ -345,7 +364,7 @@ describe('internal-plugin-encryption', () => {
+         assert.notCalled(webex.internal.metrics.submitClientMetrics);
+       });
+ 
+-      it('resolves without a metric when no report-only bundle is configured', async () => {
++      it('resolves without a metric when the enforced chain validates', async () => {
+         const result = await webex.internal.encryption.kms._validateKMSStaticPubKey(
+           validKey,
+           caroots
+@@ -355,45 +374,38 @@ describe('internal-plugin-encryption', () => {
+         assert.notCalled(webex.internal.metrics.submitClientMetrics);
+       });
+ 
+-      it('resolves without a metric when the report-only bundle also validates', async () => {
+-        webex.internal.encryption.config.carootsReportOnly = caroots;
++      it('rejects and reports an untrusted chain when enforced chain validation is enabled', async () => {
++        const error = await assert.isRejected(
++          webex.internal.encryption.kms._validateKMSStaticPubKey(validKey, unrelatedCaroots),
++          /INVALID KMS: Certificate Validation failed/
++        );
++
++        assert.calledOnceWithExactly(
++          webex.internal.metrics.submitClientMetrics,
++          'JS_SDK_KMS_CERTIFICATE_VALIDATION_FAILED',
++          {
++            fields: {success: false},
++            tags: {
++              reason: error.message,
++              kid: 'kms://kms.example.com',
++              validationMode: 'enforced',
++            },
++          }
++        );
++      });
++
++      it('resolves an untrusted chain without a metric when enforced chain validation is disabled', async () => {
++        webex.internal.encryption.config.shouldValidateKMSCertificate = false;
+ 
+         const result = await webex.internal.encryption.kms._validateKMSStaticPubKey(
+           validKey,
+-          caroots
++          unrelatedCaroots
+         );
+ 
+         assert.equal(result, validKey);
+         assert.notCalled(webex.internal.metrics.submitClientMetrics);
+       });
+ 
+-      // Explicit report-only roots are checked independently of enforcement; failures never block.
+-      [true, false].forEach((shouldValidateKMSCertificate) => {
+-        it(`resolves and reports an untrusted report-only chain with enforced chain validation ${
+-          shouldValidateKMSCertificate ? 'enabled' : 'disabled'
+-        }`, async () => {
+-          webex.internal.encryption.config.shouldValidateKMSCertificate =
+-            shouldValidateKMSCertificate;
+-          webex.internal.encryption.config.carootsReportOnly = unrelatedCaroots;
+-
+-          const result = await webex.internal.encryption.kms._validateKMSStaticPubKey(
+-            validKey,
+-            caroots
+-          );
+-
+-          assert.equal(result, validKey);
+-          assert.calledOnce(webex.internal.metrics.submitClientMetrics);
+-
+-          const [name, payload] = webex.internal.metrics.submitClientMetrics.args[0];
+-
+-          assert.equal(name, 'JS_SDK_KMS_CERTIFICATE_VALIDATION_FAILED');
+-          assert.deepEqual(payload.fields, {success: false});
+-          assert.equal(payload.tags.kid, 'kms://kms.example.com');
+-          assert.equal(payload.tags.validationMode, 'report-only');
+-          assert.match(payload.tags.reason, /INVALID KMS/);
+-        });
+-      });
+-
+       describe('asset-backed report-only validation', () => {
+         const bundle = new Uint8Array(
+           fs.readFileSync(
+@@ -411,7 +423,6 @@ describe('internal-plugin-encryption', () => {
+             shouldValidateKMSCertificate: false,
+             shouldValidateKMSCertificateReportOnly: true,
+             caroots: undefined,
+-            carootsReportOnly: undefined,
+             assetsBaseUrl: 'https://cdn.example.com/assets/internal-plugin-encryption/',
+           });
+           webex.internal.device = {url: 'https://device.example.com/device', userId: 'user'};
+@@ -473,7 +484,7 @@ describe('internal-plugin-encryption', () => {
+           webex.internal.encryption.config.caroots = caroots;
+ 
+           assertContext(await kms._prepareContext());
+-          await report.returnValues[0];
++          assert.isUndefined(await report.returnValues[0]);
+ 
+           assert.notCalled(kms._getCarootsAssetBytes);
+           assert.notCalled(webex.internal.metrics.submitClientMetrics);
+@@ -530,21 +541,6 @@ describe('internal-plugin-encryption', () => {
+           });
+         });
+ 
+-        [
+-          {title: 'valid', roots: caroots, failures: 0},
+-          {title: 'empty', roots: [], failures: 1},
+-          {title: 'untrusted', roots: unrelatedCaroots, failures: 1},
+-        ].forEach(({title, roots, failures}) => {
+-          it(`preserves the explicit ${title} legacy roots instead of fetching`, async () => {
+-            webex.internal.encryption.config.carootsReportOnly = roots;
+-
+-            assertContext(await kms._prepareContext());
+-            assert.notCalled(report);
+-            assert.notCalled(kms._getCarootsAssetBytes);
+-            assert.equal(webex.internal.metrics.submitClientMetrics.callCount, failures);
+-          });
+-        });
+-
+         it('enforces configured roots when both flags are enabled', async () => {
+           Object.assign(webex.internal.encryption.config, {
+             shouldValidateKMSCertificate: true,
+diff --git a/packages/@webex/plugin-encryption/README.md b/packages/@webex/plugin-encryption/README.md
+index 591939e9e5..f173669bd0 100644
+--- a/packages/@webex/plugin-encryption/README.md
++++ b/packages/@webex/plugin-encryption/README.md
+@@ -67,8 +67,8 @@ To observe failures without enforcing certificate-chain trust, use
+ This option defaults to `false`. It loads the same verified roots in the
+ background, using the configured asset host, and reports failures without
+ delaying or rejecting KMS setup. Mandatory key checks still apply. Enforcement
+-and explicit `carootsReportOnly` arrays take precedence. See the configuration
+-guide above for compatibility and background-reporting details.
++takes precedence. See the configuration guide above for background-reporting
++details.
+ 
+ ## API Docs and Sample App
+ 

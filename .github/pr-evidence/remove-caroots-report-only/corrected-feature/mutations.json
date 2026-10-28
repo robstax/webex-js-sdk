@@ -1,0 +1,55 @@
+{
+  "results": [
+    {
+      "name": "background-opt-in-disabled",
+      "detected": true,
+      "exitCode": 1
+    },
+    {
+      "name": "enforcement-precedence-removed",
+      "detected": true,
+      "exitCode": 1
+    },
+    {
+      "name": "primary-enforcement-disabled",
+      "detected": true,
+      "exitCode": 1
+    },
+    {
+      "name": "background-awaited",
+      "detected": true,
+      "exitCode": 1
+    },
+    {
+      "name": "configured-roots-ignored",
+      "detected": true,
+      "exitCode": 1
+    },
+    {
+      "name": "failed-cache-retained",
+      "detected": true,
+      "exitCode": 1
+    },
+    {
+      "name": "failure-metric-removed",
+      "detected": true,
+      "exitCode": 1
+    },
+    {
+      "name": "primary-failure-swallowed",
+      "detected": true,
+      "exitCode": 1
+    },
+    {
+      "name": "report-return-value-changed",
+      "detected": true,
+      "exitCode": 1
+    },
+    {
+      "name": "checked-key-replaced",
+      "detected": true,
+      "exitCode": 1
+    }
+  ],
+  "restored": true
+}

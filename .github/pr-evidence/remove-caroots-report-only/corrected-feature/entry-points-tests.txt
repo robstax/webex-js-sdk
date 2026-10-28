@@ -1,0 +1,6 @@
+PASS packages/webex/test/unit/spec/assets-config.js
+
+Test Suites: 1 passed, 1 total
+Tests:       24 passed, 24 total
+Snapshots:   0 total
+Time:        1.378 s, estimated 5 s

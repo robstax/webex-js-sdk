@@ -1,0 +1,33 @@
+Browserslist: browsers data (caniuse-lite) is 7 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+PASS test/unit/spec/kms-certificate-validation.js
+  internal-plugin-encryption
+    kms-certificate-validation
+      ✓ validates a good JWT (15 ms)
+      ✓ validates a good JWT (SAN extension) (4 ms)
+      ✓ rejects if `JWT` is undefined (1 ms)
+      ✓ rejects if the `kty` is wrong.
+      ✓ rejects if `kty` is not a string
+      ✓ rejects if the `kid` is wrong
+      ✓ rejects if the `kid` is not a string
+      ✓ rejects if there is not a list of certificates
+      ✓ rejects if certificate list is not an array
+      ✓ rejects if the certificate list is empty
+      ✓ rejects if the `kid` does not match the certificate (1 ms)
+      ✓ rejects if the public exponent is wrong (1 ms)
+      ✓ rejects if the modulus is wrong (1 ms)
+      ✓ rejects a self signed certificate (2 ms)
+      ✓ rejects when validation is required but no CA roots are configured (1 ms)
+      ✓ rejects when validation is required and CA roots are empty (1 ms)
+      ✓ accepts self signed certificate when signature validation is disabled (1 ms)
+  validateCommonName
+    ✓ handles mixed case SAN
+    ✓ handles different case SAN
+    ✓ handles different case kid hostname
+
+Test Suites: 1 passed, 1 total
+Tests:       20 passed, 20 total
+Snapshots:   0 total
+Time:        0.456 s, estimated 1 s
+Ran all test suites matching /\/private\/tmp\/webex-js-sdk-remove-caroots-report-only\/packages\/@webex\/internal-plugin-encryption\/test\/unit\/spec\/kms-certificate-validation.js/i.

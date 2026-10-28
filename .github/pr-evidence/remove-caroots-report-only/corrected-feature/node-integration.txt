@@ -1,0 +1,218 @@
+node:internal/modules/cjs/loader:501
+      throw err;
+      ^
+
+Error: Cannot find module '/private/tmp/webex-js-sdk-remove-caroots-report-only/packages/@webex/test-helper-server/dist/index.js'. Please verify that the package.json has a valid "main" entry
+    at tryPackage (node:internal/modules/cjs/loader:493:19)
+    at Function._findPath (node:internal/modules/cjs/loader:775:18)
+    at resolveMainPath (node:internal/modules/run_main:39:23)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:162:20)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  path: '/private/tmp/webex-js-sdk-remove-caroots-report-only/packages/@webex/test-helper-server/package.json',
+  requestPath: '/private/tmp/webex-js-sdk-remove-caroots-report-only/packages/@webex/test-helper-server'
+}
+
+Node.js v22.14.0
+Browserslist: browsers data (caniuse-lite) is 7 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+
+
+  Encryption
+    KMS CA roots
+webex-store: constructing boundedStorage
+webex-store: retrieving Device:@
+storage: getting binding for `Device`
+memory-store-adapter: returning binding
+webex-store: retrieving Credentials:@
+storage: getting binding for `Credentials`
+memory-store-adapter: returning binding
+storage: made binding for `Device`
+storage: made binding for `Credentials`
+      ✔ does not load CA roots by default
+memory-store-adapter: reading `@`
+memory-store-adapter: reading `@`
+storage:(Device): got `@` for first time
+storage:(Device): set `@` for first time
+storage:(Credentials): got `@` for first time
+storage:(Credentials): set `@` for first time
+call-diagnostic-events ->  CallDiagnosticMetrics: @submitDelayedClientEvents. Submitting delayed client events.
+services: skipping cache warm-up as per the cache config
+webex-store: removing Credentials:@
+storage: getting binding for `Credentials`
+storage: found binding for `Credentials`
+memory-store-adapter: deleting `@`
+webex-store: constructing boundedStorage
+webex-store: retrieving Device:@
+storage: getting binding for `Device`
+memory-store-adapter: returning binding
+webex-store: retrieving Credentials:@
+storage: getting binding for `Credentials`
+memory-store-adapter: returning binding
+storage: made binding for `Device`
+storage: made binding for `Credentials`
+      ✔ does not load CA roots by default even with configured roots
+memory-store-adapter: reading `@`
+memory-store-adapter: reading `@`
+storage:(Device): got `@` for first time
+storage:(Device): set `@` for first time
+storage:(Credentials): got `@` for first time
+storage:(Credentials): set `@` for first time
+call-diagnostic-events ->  CallDiagnosticMetrics: @submitDelayedClientEvents. Submitting delayed client events.
+services: skipping cache warm-up as per the cache config
+webex-store: removing Credentials:@
+storage: getting binding for `Credentials`
+storage: found binding for `Credentials`
+memory-store-adapter: deleting `@`
+Error: getaddrinfo ENOTFOUND u2c-intb.ciscospark.com
+    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:120:26) {
+  errno: -3008,
+  code: 'ENOTFOUND',
+  syscall: 'getaddrinfo',
+  hostname: 'u2c-intb.ciscospark.com'
+}
+services: failed to init initial services when no credentials available, getaddrinfo ENOTFOUND u2c-intb.ciscospark.com
+GET https://u2c-intb.ciscospark.com/u2c/api/v1/limited/catalog
+WEBEX_TRACKING_ID: webex-js-sdk_4d87b7cb-20b3-41c0-adb6-16d9c8fa78ca_1
+
+Error: getaddrinfo ENOTFOUND u2c-intb.ciscospark.com
+    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:120:26) {
+  errno: -3008,
+  code: 'ENOTFOUND',
+  syscall: 'getaddrinfo',
+  hostname: 'u2c-intb.ciscospark.com'
+}
+services: failed to init initial services when no credentials available, getaddrinfo ENOTFOUND u2c-intb.ciscospark.com
+GET https://u2c-intb.ciscospark.com/u2c/api/v1/limited/catalog
+WEBEX_TRACKING_ID: webex-js-sdk_937f385a-a9ca-4228-b731-c530bb84e065_1
+
+webex-store: constructing boundedStorage
+webex-store: retrieving Device:@
+storage: getting binding for `Device`
+memory-store-adapter: returning binding
+webex-store: retrieving Credentials:@
+storage: getting binding for `Credentials`
+memory-store-adapter: returning binding
+kms: loading CA roots asset ios_union-20261022.p7b
+storage: made binding for `Device`
+storage: made binding for `Credentials`
+memory-store-adapter: reading `@`
+memory-store-adapter: reading `@`
+storage:(Device): got `@` for first time
+storage:(Device): set `@` for first time
+storage:(Credentials): got `@` for first time
+storage:(Credentials): set `@` for first time
+call-diagnostic-events ->  CallDiagnosticMetrics: @submitDelayedClientEvents. Submitting delayed client events.
+services: skipping cache warm-up as per the cache config
+webex-store: removing Credentials:@
+storage: getting binding for `Credentials`
+storage: found binding for `Credentials`
+memory-store-adapter: deleting `@`
+Error: getaddrinfo ENOTFOUND u2c-intb.ciscospark.com
+    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:120:26) {
+  errno: -3008,
+  code: 'ENOTFOUND',
+  syscall: 'getaddrinfo',
+  hostname: 'u2c-intb.ciscospark.com'
+}
+services: failed to init initial services when no credentials available, getaddrinfo ENOTFOUND u2c-intb.ciscospark.com
+GET https://u2c-intb.ciscospark.com/u2c/api/v1/limited/catalog
+WEBEX_TRACKING_ID: webex-js-sdk_b352befa-0409-4fbb-a6d8-e58ef578d775_1
+
+kms: verified CA roots asset version 20261022 with 231 roots
+      ✔ loads and verifies the shipped Cisco Union bundle (179ms)
+      background report-only roots
+webex-store: constructing boundedStorage
+webex-store: retrieving Device:@
+storage: getting binding for `Device`
+memory-store-adapter: returning binding
+webex-store: retrieving Credentials:@
+storage: getting binding for `Credentials`
+memory-store-adapter: returning binding
+storage: made binding for `Device`
+storage: made binding for `Credentials`
+kms: loading CA roots asset ios_union-20261022.p7b
+memory-store-adapter: reading `@`
+memory-store-adapter: reading `@`
+storage:(Device): got `@` for first time
+storage:(Device): set `@` for first time
+storage:(Credentials): got `@` for first time
+storage:(Credentials): set `@` for first time
+call-diagnostic-events ->  CallDiagnosticMetrics: @submitDelayedClientEvents. Submitting delayed client events.
+services: skipping cache warm-up as per the cache config
+webex-store: removing Credentials:@
+storage: getting binding for `Credentials`
+storage: found binding for `Credentials`
+memory-store-adapter: deleting `@`
+kms: verified CA roots asset version 20261022 with 231 roots
+kms: report-only certificate validation failed KMSError: INVALID KMS: Certificate Validation failed [-1]: No valid certificate paths found
+    at throwError (/private/tmp/webex-js-sdk-remove-caroots-report-only/packages/@webex/internal-plugin-encryption/dist/kms-certificate-validation.js:50:9)
+    at /private/tmp/webex-js-sdk-remove-caroots-report-only/packages/@webex/internal-plugin-encryption/dist/kms-certificate-validation.js:194:7 {
+  kmsError: true
+}
+        ✔ loads verified asset roots and reports the fixture chain without rejecting the key (209ms)
+Error: getaddrinfo ENOTFOUND u2c-intb.ciscospark.com
+    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:120:26) {
+  errno: -3008,
+  code: 'ENOTFOUND',
+  syscall: 'getaddrinfo',
+  hostname: 'u2c-intb.ciscospark.com'
+}
+services: failed to init initial services when no credentials available, getaddrinfo ENOTFOUND u2c-intb.ciscospark.com
+GET https://u2c-intb.ciscospark.com/u2c/api/v1/limited/catalog
+WEBEX_TRACKING_ID: webex-js-sdk_948f7b51-1668-40d9-8871-5a9c72937e5c_1
+
+webex-store: constructing boundedStorage
+webex-store: retrieving Device:@
+storage: getting binding for `Device`
+memory-store-adapter: returning binding
+webex-store: retrieving Credentials:@
+storage: getting binding for `Credentials`
+memory-store-adapter: returning binding
+storage: made binding for `Device`
+storage: made binding for `Credentials`
+kms: loading CA roots asset ios_union-20261022.p7b
+memory-store-adapter: reading `@`
+memory-store-adapter: reading `@`
+kms: CA roots asset failed verification UnionBundleVerificationError: Cisco Union bundle verification failed (parse): End of input reached before message was fully decoded (inconsistent offset and length values)
+    at fail (/Users/rstachof/projects/webex-js-sdk/packages/@webex/kms-caroots/verify.js:60:9)
+    at parseAsn1 (/Users/rstachof/projects/webex-js-sdk/packages/@webex/kms-caroots/verify.js:121:5)
+    at parseSignedData (/Users/rstachof/projects/webex-js-sdk/packages/@webex/kms-caroots/verify.js:137:44)
+    at verifyUnionBundle (/Users/rstachof/projects/webex-js-sdk/packages/@webex/kms-caroots/verify.js:319:24)
+    at /private/tmp/webex-js-sdk-remove-caroots-report-only/packages/@webex/internal-plugin-encryption/dist/kms.js:919:26
+    at processTicksAndRejections (node:internal/process/task_queues:105:5) {
+  reason: 'parse'
+}
+storage:(Device): got `@` for first time
+storage:(Device): set `@` for first time
+storage:(Credentials): got `@` for first time
+storage:(Credentials): set `@` for first time
+call-diagnostic-events ->  CallDiagnosticMetrics: @submitDelayedClientEvents. Submitting delayed client events.
+services: skipping cache warm-up as per the cache config
+kms: report-only CA roots unavailable KMSError: unable to load the CA roots used to validate the KMS certificate ("ios_union-20261022.p7b" failed verification). Set `encryption.caroots` to CA roots generated with @webex/kms-caroots, set `encryption.assetsBaseUrl` to a URL hosting "ios_union-20261022.p7b", or set `encryption.shouldValidateKMSCertificate` to false to opt out of validation. Cause: Cisco Union bundle verification failed (parse): End of input reached before message was fully decoded (inconsistent offset and length values)
+    at fail (/private/tmp/webex-js-sdk-remove-caroots-report-only/packages/@webex/internal-plugin-encryption/dist/kms.js:907:7)
+    at /private/tmp/webex-js-sdk-remove-caroots-report-only/packages/@webex/internal-plugin-encryption/dist/kms.js:944:35
+    at processTicksAndRejections (node:internal/process/task_queues:105:5) {
+  kmsError: true
+}
+        ✔ returns the checked key before a pending asset request settles
+webex-store: removing Credentials:@
+storage: getting binding for `Credentials`
+storage: found binding for `Credentials`
+memory-store-adapter: deleting `@`
+
+Error: getaddrinfo ENOTFOUND u2c-intb.ciscospark.com
+    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:120:26) {
+  errno: -3008,
+  code: 'ENOTFOUND',
+  syscall: 'getaddrinfo',
+  hostname: 'u2c-intb.ciscospark.com'
+}
+services: failed to init initial services when no credentials available, getaddrinfo ENOTFOUND u2c-intb.ciscospark.com
+GET https://u2c-intb.ciscospark.com/u2c/api/v1/limited/catalog
+WEBEX_TRACKING_ID: webex-js-sdk_baee2c5f-b36a-4b00-bcba-2c27252aaf57_1
+
+
+  5 passing (429ms)
+

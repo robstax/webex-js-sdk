@@ -1,0 +1,84 @@
+[33m27 10 2026 22:08:36.119:WARN [proxy]: [39mproxy "http://localhost:9100" normalized to "http://localhost:9100/"
+Tests run started
+
+START:
+node:internal/modules/cjs/loader:501
+      throw err;
+      ^
+
+Error: Cannot find module '/private/tmp/webex-js-sdk-remove-caroots-report-only/packages/@webex/test-helper-server/dist/index.js'. Please verify that the package.json has a valid "main" entry
+    at tryPackage (node:internal/modules/cjs/loader:493:19)
+    at Function._findPath (node:internal/modules/cjs/loader:775:18)
+    at resolveMainPath (node:internal/modules/run_main:39:23)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:162:20)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  path: '/private/tmp/webex-js-sdk-remove-caroots-report-only/packages/@webex/test-helper-server/package.json',
+  requestPath: '/private/tmp/webex-js-sdk-remove-caroots-report-only/packages/@webex/test-helper-server'
+}
+
+Node.js v22.14.0
+Browserslist: browsers data (caniuse-lite) is 7 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+Browserslist: browsers data (caniuse-lite) is 7 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+[32m27 10 2026 22:08:40.519:INFO [framework.browserify]: [39mbundle built
+[32m27 10 2026 22:08:40.536:INFO [karma-server]: [39mKarma v6.4.4 server started at http://localhost:9101/
+[32m27 10 2026 22:08:40.536:INFO [launcher]: [39mLaunching browsers ChromeHeadless_H264 with concurrency 4
+[32m27 10 2026 22:08:40.545:INFO [launcher]: [39mStarting browser ChromeHeadless
+[32m27 10 2026 22:08:41.175:INFO [Chrome Headless 156.0.0.0 (Mac OS 10.15.7)]: [39mConnected on socket _gNFOsg1vaXLPmOqAAAB with id 63300760
+  Encryption
+    KMS CA roots
+      ✔ does not load CA roots by default
+      ✔ does not load CA roots by default even with configured roots
+(node:20689) [DEP0060] DeprecationWarning: The `util._extend` API is deprecated. Please use Object.assign() instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+      ✔ loads and verifies the shipped Cisco Union bundle
+WARN: 'http GET to /assets/does-not-exist/ios_union-20261022.p7b result: 404 body:', ArrayBuffer{}
+ERROR: 'kms: failed to load CA roots asset', NotFound: {}
+GET /assets/does-not-exist/ios_union-20261022.p7b
+WEBEX_TRACKING_ID: undefined
+
+NotFound: [object Object]
+    at HttpStatusInterceptor.onResponse (http://localhost:9101/absolute/var/folders/lk/z_4qfrzj5dn11fvcp69q0zwh0000gn/T/2216338998ee504b0b505a67723d9bd3.browserify.js?067e6eb0a084691b8d943cc15628cb9d8fc8b25c:182790:38)
+    at http://localhost:9101/absolute/var/folders/lk/z_4qfrzj5dn11fvcp69q0zwh0000gn/T/2216338998ee504b0b505a67723d9bd3.browserify.js?067e6eb0a084691b8d943cc15628cb9d8fc8b25c:183731:39
+      ✔ fails closed when the asset cannot be downloaded
+WARN: 'kms: report-only certificate validation failed', Error: INVALID KMS: Certificate Validation failed [-1]: No valid certificate paths found
+Error: INVALID KMS: Certificate Validation failed [-1]: No valid certificate paths found
+    at throwError (http://localhost:9101/absolute/var/folders/lk/z_4qfrzj5dn11fvcp69q0zwh0000gn/T/2216338998ee504b0b505a67723d9bd3.browserify.js?067e6eb0a084691b8d943cc15628cb9d8fc8b25c:211266:9)
+    at http://localhost:9101/absolute/var/folders/lk/z_4qfrzj5dn11fvcp69q0zwh0000gn/T/2216338998ee504b0b505a67723d9bd3.browserify.js?067e6eb0a084691b8d943cc15628cb9d8fc8b25c:211438:7
+      background report-only roots
+        ✔ loads verified asset roots and reports the fixture chain without rejecting the key
+ERROR: 'kms: CA roots asset failed verification', UnionBundleVerificationError: Cisco Union bundle verification failed (parse): End of input reached before message was fully decoded (inconsistent offset and length values)
+UnionBundleVerificationError: Cisco Union bundle verification failed (parse): End of input reached before message was fully decoded (inconsistent offset and length values)
+    at fail (http://localhost:9101/absolute/var/folders/lk/z_4qfrzj5dn11fvcp69q0zwh0000gn/T/2216338998ee504b0b505a67723d9bd3.browserify.js?067e6eb0a084691b8d943cc15628cb9d8fc8b25c:195515:9)
+    at parseAsn1 (http://localhost:9101/absolute/var/folders/lk/z_4qfrzj5dn11fvcp69q0zwh0000gn/T/2216338998ee504b0b505a67723d9bd3.browserify.js?067e6eb0a084691b8d943cc15628cb9d8fc8b25c:195576:5)
+    at parseSignedData (http://localhost:9101/absolute/var/folders/lk/z_4qfrzj5dn11fvcp69q0zwh0000gn/T/2216338998ee504b0b505a67723d9bd3.browserify.js?067e6eb0a084691b8d943cc15628cb9d8fc8b25c:195592:44)
+    at verifyUnionBundle (http://localhost:9101/absolute/var/folders/lk/z_4qfrzj5dn11fvcp69q0zwh0000gn/T/2216338998ee504b0b505a67723d9bd3.browserify.js?067e6eb0a084691b8d943cc15628cb9d8fc8b25c:195774:24)
+    at http://localhost:9101/absolute/var/folders/lk/z_4qfrzj5dn11fvcp69q0zwh0000gn/T/2216338998ee504b0b505a67723d9bd3.browserify.js?067e6eb0a084691b8d943cc15628cb9d8fc8b25c:212667:48
+WARN: 'kms: report-only CA roots unavailable', Error: unable to load the CA roots used to validate the KMS certificate ("ios_union-20261022.p7b" failed verification). Set `encryption.caroots` to CA roots generated with @webex/kms-caroots, set `encryption.assetsBaseUrl` to a URL hosting "ios_union-20261022.p7b", or set `encryption.shouldValidateKMSCertificate` to false to opt out of validation. Cause: Cisco Union bundle verification failed (parse): End of input reached before message was fully decoded (inconsistent offset and length values)
+Error: unable to load the CA roots used to validate the KMS certificate ("ios_union-20261022.p7b" failed verification). Set `encryption.caroots` to CA roots generated with @webex/kms-caroots, set `encryption.assetsBaseUrl` to a URL hosting "ios_union-20261022.p7b", or set `encryption.shouldValidateKMSCertificate` to false to opt out of validation. Cause: Cisco Union bundle verification failed (parse): End of input reached before message was fully decoded (inconsistent offset and length values)
+    at fail (http://localhost:9101/absolute/var/folders/lk/z_4qfrzj5dn11fvcp69q0zwh0000gn/T/2216338998ee504b0b505a67723d9bd3.browserify.js?067e6eb0a084691b8d943cc15628cb9d8fc8b25c:212663:14)
+    at http://localhost:9101/absolute/var/folders/lk/z_4qfrzj5dn11fvcp69q0zwh0000gn/T/2216338998ee504b0b505a67723d9bd3.browserify.js?067e6eb0a084691b8d943cc15628cb9d8fc8b25c:212699:40
+        ✔ returns the checked key before a pending asset request settles
+WARN: 'http GET to /assets/does-not-exist/ios_union-20261022.p7b result: 404 body:', ArrayBuffer{}
+ERROR: 'kms: failed to load CA roots asset', NotFound: {}
+GET /assets/does-not-exist/ios_union-20261022.p7b
+WEBEX_TRACKING_ID: undefined
+
+NotFound: [object Object]
+    at HttpStatusInterceptor.onResponse (http://localhost:9101/absolute/var/folders/lk/z_4qfrzj5dn11fvcp69q0zwh0000gn/T/2216338998ee504b0b505a67723d9bd3.browserify.js?067e6eb0a084691b8d943cc15628cb9d8fc8b25c:182790:38)
+    at http://localhost:9101/absolute/var/folders/lk/z_4qfrzj5dn11fvcp69q0zwh0000gn/T/2216338998ee504b0b505a67723d9bd3.browserify.js?067e6eb0a084691b8d943cc15628cb9d8fc8b25c:183731:39
+WARN: 'kms: report-only CA roots unavailable', Error: unable to load the CA roots used to validate the KMS certificate ("ios_union-20261022.p7b" could not be loaded). Set `encryption.caroots` to CA roots generated with @webex/kms-caroots, set `encryption.assetsBaseUrl` to a URL hosting "ios_union-20261022.p7b", or set `encryption.shouldValidateKMSCertificate` to false to opt out of validation. Cause: HTTP 404 /assets/does-not-exist/ios_union-20261022.p7b
+Error: unable to load the CA roots used to validate the KMS certificate ("ios_union-20261022.p7b" could not be loaded). Set `encryption.caroots` to CA roots generated with @webex/kms-caroots, set `encryption.assetsBaseUrl` to a URL hosting "ios_union-20261022.p7b", or set `encryption.shouldValidateKMSCertificate` to false to opt out of validation. Cause: HTTP 404 /assets/does-not-exist/ios_union-20261022.p7b
+    at fail (http://localhost:9101/absolute/var/folders/lk/z_4qfrzj5dn11fvcp69q0zwh0000gn/T/2216338998ee504b0b505a67723d9bd3.browserify.js?067e6eb0a084691b8d943cc15628cb9d8fc8b25c:212663:14)
+    at http://localhost:9101/absolute/var/folders/lk/z_4qfrzj5dn11fvcp69q0zwh0000gn/T/2216338998ee504b0b505a67723d9bd3.browserify.js?067e6eb0a084691b8d943cc15628cb9d8fc8b25c:212712:38
+        ✔ reports a failed application-hosted request without rejecting the key
+Test run complete
+
+Finished in 0.429 secs / 0.387 secs @ 22:08:41 GMT-0400 (Eastern Daylight Time)
+
+SUMMARY:
+✔ 7 tests completed
