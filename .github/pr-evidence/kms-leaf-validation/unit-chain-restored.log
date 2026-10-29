@@ -1,0 +1,67 @@
+Browserslist: browsers data (caniuse-lite) is 7 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+PASS test/unit/spec/kms-certificate-chain.ts
+  KMS identity certificate chain
+    ✓ accepts one certificate without changing the public input (14 ms)
+    ✓ accepts leaf and intermediate without changing the public input (4 ms)
+    ✓ accepts included root without changing the public input (4 ms)
+    ✓ accepts extra trusted certificate without changing the public input (5 ms)
+    ✓ rejects expired leaf with valid intermediate without changing the public input (3 ms)
+    ✓ rejects future leaf with valid intermediate without changing the public input (3 ms)
+    ✓ rejects invalid leaf signature without changing the public input (2 ms)
+    ✓ rejects invalid intermediate signature without changing the public input (2 ms)
+    ✓ rejects missing intermediate without changing the public input (2 ms)
+    ✓ rejects untrusted complete chain without changing the public input (4 ms)
+    ✓ rejects invalid leaf before unrelated trusted certificate without changing the public input (3 ms)
+    ✓ accepts duplicated root without changing the public input (3 ms)
+    ✓ accepts valid duplicated leaf without changing the public input (3 ms)
+    ✓ accepts valid leaf in trust store position 0 without changing the public input (2 ms)
+    ✓ accepts valid leaf in trust store position 1 without changing the public input (2 ms)
+    ✓ rejects expired duplicated leaf without changing the public input (4 ms)
+    ✓ rejects expired leaf in trust store position 0 without changing the public input (3 ms)
+    ✓ rejects expired leaf in trust store position 1 without changing the public input (2 ms)
+    ✓ rejects future duplicated leaf without changing the public input (2 ms)
+    ✓ rejects future leaf in trust store position 0 without changing the public input (1 ms)
+    ✓ rejects future leaf in trust store position 1 without changing the public input (2 ms)
+    ✓ rejects invalid leaf followed by valid duplicate TBS without changing the public input (2 ms)
+    ✓ accepts valid leaf followed by invalid duplicate TBS without changing the public input (2 ms)
+    ✓ rejects invalid leaf matching trusted TBS without changing the public input (1 ms)
+    ✓ accepts valid leaf matching invalid trusted TBS without changing the public input (2 ms)
+    ✓ rejects missing intermediate with leaf in trust store without changing the public input (2 ms)
+    ✓ rejects non-CA leaf as the only trust anchor without changing the public input (1 ms)
+    ✓ accepts explicitly trusted self-issued CA after an unrelated root without changing the public input (4 ms)
+    ✓ accepts valid explicitly trusted self-issued CA with extra certificates without changing the public input (3 ms)
+    ✓ rejects expired explicitly trusted self-issued CA with extra certificates without changing the public input (3 ms)
+    ✓ rejects future explicitly trusted self-issued CA with extra certificates without changing the public input (3 ms)
+    ✓ rejects untrusted self-issued CA without changing the public input (3 ms)
+    ✓ rejects invalid self-issued leaf signature matching trusted TBS without changing the public input (5 ms)
+    ✓ retains the key type check when signature validation is disabled
+    ✓ retains the key URI check when signature validation is disabled
+    ✓ retains the key protocol check when signature validation is disabled (1 ms)
+    ✓ retains the missing certificates check when signature validation is disabled
+    ✓ retains the empty certificates check when signature validation is disabled
+    ✓ retains the non-string certificate check when signature validation is disabled
+    ✓ retains the hostname check when signature validation is disabled
+    ✓ retains the public exponent check when signature validation is disabled (1 ms)
+    ✓ retains the modulus check when signature validation is disabled (1 ms)
+    ✓ retains the explicit signature bypass for expired leaf with valid intermediate (1 ms)
+    ✓ retains the explicit signature bypass for future leaf with valid intermediate
+    ✓ retains the explicit signature bypass for invalid leaf signature (1 ms)
+    ✓ rejects a successful engine result with a different leaf (2 ms)
+    ✓ rejects a successful engine result with an empty path (1 ms)
+    ✓ rejects a successful engine result with no path (1 ms)
+    ✓ preserves an engine failure even when its path starts with the intended leaf (1 ms)
+    ✓ preserves enforced policy for a valid leaf (6 ms)
+    ✓ preserves enforced policy for an invalid leaf (4 ms)
+    ✓ preserves explicit report-only policy for a valid leaf (4 ms)
+    ✓ preserves explicit report-only policy for an invalid leaf (4 ms)
+    ✓ preserves background report-only policy for a valid leaf (4 ms)
+    ✓ preserves background report-only policy for an invalid leaf (4 ms)
+    ✓ returns the key before the background check completes and reports its later failure (4 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       56 passed, 56 total
+Snapshots:   0 total
+Time:        1.519 s, estimated 2 s
+Ran all test suites matching /\/private\/tmp\/webex-js-sdk-kms-certificate-validation-fix\/packages\/@webex\/internal-plugin-encryption\/test\/unit\/spec\/kms-certificate-chain.ts/i.

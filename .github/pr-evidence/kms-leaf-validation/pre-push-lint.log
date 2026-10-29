@@ -1,0 +1,16 @@
+Browserslist: browsers data (caniuse-lite) is 7 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+
+/private/tmp/webex-js-sdk-kms-certificate-validation-fix/packages/@webex/internal-plugin-encryption/test/integration/spec/kms-certificate-chain.js
+  5:1  warning  '@webex/internal-plugin-encryption' should be listed in the project's dependencies. Run 'npm i -S @webex/internal-plugin-encryption' to add it  import/no-extraneous-dependencies
+
+/private/tmp/webex-js-sdk-kms-certificate-validation-fix/packages/@webex/internal-plugin-encryption/test/lib/kms-certificate-chain.js
+  5:1  warning  '@webex/test-helper-chai' should be listed in the project's dependencies, not devDependencies  import/no-extraneous-dependencies
+
+/private/tmp/webex-js-sdk-kms-certificate-validation-fix/packages/@webex/internal-plugin-encryption/test/unit/spec/kms-certificate-chain.ts
+  5:1  warning  '@webex/test-helper-mock-webex' should be listed in the project's dependencies, not devDependencies                                             import/no-extraneous-dependencies
+  6:1  warning  '@webex/internal-plugin-encryption' should be listed in the project's dependencies. Run 'npm i -S @webex/internal-plugin-encryption' to add it  import/no-extraneous-dependencies
+
+✖ 4 problems (0 errors, 4 warnings)
+

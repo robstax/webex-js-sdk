@@ -1,0 +1,83 @@
+Browserslist: browsers data (caniuse-lite) is 7 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+Browserslist: browsers data (caniuse-lite) is 7 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+PASS test/unit/spec/kms.js (9.42 s)
+  internal-plugin-encryption
+    kms
+      key management
+        ✓ listAllCustomerMasterKey (4 ms)
+        ✓ uploadCustomerMasterKey without backup (2 ms)
+        ✓ deleteAllCustomerMasterKeys (1 ms)
+        fetchKey
+          ✓ should fetch key normally when no redirect is needed (2 ms)
+          ✓ should handle redirect when errorCode is 301002 (2 ms)
+          ✓ should not redirect when errorCode is not 301002 (2 ms)
+          ✓ should not redirect when redirectUri is missing (1 ms)
+          ✓ should reject when uri is not provided (2 ms)
+      _validateKMSStaticPubKey
+        ✓ rejects and reports invalid KMS metadata with enforced chain validation enabled (1 ms)
+        ✓ rejects and reports invalid KMS metadata with enforced chain validation disabled (1 ms)
+        ✓ preserves the validation error when metric submission rejects (2 ms)
+        ✓ rejects when enforced chain validation is enabled but no caroots are provided (5 ms)
+        ✓ resolves with no caroots when enforced chain validation is disabled (2 ms)
+        ✓ resolves without a metric when no report-only bundle is configured (12 ms)
+        ✓ resolves without a metric when the report-only bundle also validates (7 ms)
+        ✓ resolves and reports an untrusted report-only chain with enforced chain validation enabled (6 ms)
+        ✓ resolves and reports an untrusted report-only chain with enforced chain validation disabled (5 ms)
+        independent report-only asset source
+          ✓ does not fetch report-only roots when the URL is undefined (3 ms)
+          ✓ does not fetch report-only roots when the URL is null (3 ms)
+          ✓ does not fetch report-only roots when the URL is "" (3 ms)
+          ✓ completes context setup while the report-only download remains pending (430 ms)
+          ✓ uses the report-only asset independently of supplied roots with enforcement false (387 ms)
+          ✓ uses the report-only asset independently of supplied roots with enforcement true (393 ms)
+          ✓ reports download failure without rejecting context setup (3 ms)
+          ✓ reports signature failure without rejecting context setup (68 ms)
+          ✓ reports version failure without rejecting context setup (3 ms)
+          ✓ reports synchronous download failure without rejecting context setup (3 ms)
+          ✓ retains the explicit valid legacy array instead of the report-only URL (4 ms)
+          ✓ retains the explicit empty legacy array instead of the report-only URL (3 ms)
+          ✓ retains the explicit untrusted legacy array instead of the report-only URL (4 ms)
+          ✓ still rejects enforced download failure when a report-only URL is configured (3 ms)
+          ✓ still rejects enforced signature failure when a report-only URL is configured (67 ms)
+          ✓ still rejects enforced version failure when a report-only URL is configured (2 ms)
+          ✓ still rejects enforced chain failure when a report-only URL is configured (3 ms)
+          ✓ rejects invalid mandatory key metadata before starting the new check (2 ms)
+          ✓ shares a verified load between concurrent report-only contexts (490 ms)
+          ✓ keeps distinct URLs separate and reuses an earlier verified URL (881 ms)
+          ✓ keeps the enforced packaged source separate from the explicit URL at the same base (535 ms)
+          ✓ evicts a failed report-only load without discarding enforced roots (712 ms)
+          ✓ does not reuse roots when the requested asset filename changes (583 ms)
+          ✓ captures the complete enforced source before a deferred fetch (525 ms)
+          ✓ captures the complete report-only source before a deferred fetch (526 ms)
+          ✓ owns an unexpected background task rejection (3 ms)
+      CA roots
+        _getCaroots
+          ✓ resolves undefined without loading the asset when validation is disabled (2 ms)
+          ✓ prefers configured caroots over the asset (1 ms)
+          ✓ loads and verifies the asset when caroots is undefined (261 ms)
+          ✓ loads and verifies the asset when caroots is [] (263 ms)
+          ✓ caches the verified CA roots (263 ms)
+          ✓ fails closed with an actionable error and retries after a network error (264 ms)
+          ✓ fails closed with an actionable error and retries after an HTTP error (286 ms)
+          ✓ fails closed with an actionable error and retries when the asset fails verification (326 ms)
+          ✓ reports a stale asset in enforced mode but still uses it (259 ms)
+          ✓ reports a stale asset in report-only mode but still uses it (261 ms)
+        _getCarootsAssetBytes
+          ✓ reads the asset shipped with the package in Node (10 ms)
+        _prepareContext
+          ✓ validates the KMS key against the resolved CA roots (1 ms)
+        _getContext
+          ✓ retries the negotiation after a failed attempt (2 ms)
+      KMS error
+        ✓ KMSError (2 ms)
+        ✓ includes the Webex tracking ID in KMS timeout errors (1 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       58 passed, 58 total
+Snapshots:   0 total
+Time:        9.454 s
+Ran all test suites matching /\/private\/tmp\/webex-js-sdk-kms-certificate-validation-fix\/packages\/@webex\/internal-plugin-encryption\/test\/unit\/spec\/kms.js/i.

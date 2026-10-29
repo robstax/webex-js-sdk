@@ -1,0 +1,508 @@
+{
+  "node": "v22.14.0",
+  "base": "77dbe986d6afe944525aa9dbdd3428294469aa77",
+  "fixedSourceSHA256": "d83a65b4dd96216a490b80372466604ceb036bf43754afbcc0bdf37d67c39d07",
+  "fixtureSHA256": "1b339724546960fdb9c25870094742e74a839f63a86919e31fc00ea78ef7a679",
+  "pkijsVersion": "3.3.3",
+  "note": "Validators are compiled in memory from the recorded base and final fixed source. No SDK source file is changed. Both use the same installed dependencies, certificate bytes, roots, and fake validation times. Trust-store equality cases are not compared with system openssl because anchor semantics can differ.",
+  "results": [
+    {
+      "case": "one certificate",
+      "expected": "accepted",
+      "time": "2030-01-01T00:00:00Z",
+      "original": {
+        "result": "accepted",
+        "returnedOriginalKey": true
+      },
+      "fixed": {
+        "result": "accepted",
+        "returnedOriginalKey": true
+      }
+    },
+    {
+      "case": "leaf and intermediate",
+      "expected": "accepted",
+      "time": "2030-01-01T00:00:00Z",
+      "original": {
+        "result": "accepted",
+        "returnedOriginalKey": true
+      },
+      "fixed": {
+        "result": "accepted",
+        "returnedOriginalKey": true
+      }
+    },
+    {
+      "case": "included root",
+      "expected": "accepted",
+      "time": "2030-01-01T00:00:00Z",
+      "original": {
+        "result": "accepted",
+        "returnedOriginalKey": true
+      },
+      "fixed": {
+        "result": "accepted",
+        "returnedOriginalKey": true
+      }
+    },
+    {
+      "case": "extra trusted certificate",
+      "expected": "accepted",
+      "time": "2030-01-01T00:00:00Z",
+      "original": {
+        "result": "accepted",
+        "returnedOriginalKey": true
+      },
+      "fixed": {
+        "result": "accepted",
+        "returnedOriginalKey": true
+      }
+    },
+    {
+      "case": "expired leaf with valid intermediate",
+      "expected": "rejected",
+      "time": "2036-01-01T00:00:00Z",
+      "original": {
+        "result": "accepted",
+        "returnedOriginalKey": true
+      },
+      "fixed": {
+        "result": "rejected",
+        "message": "INVALID KMS: Certificate Validation failed [8]: The certificate is either not yet valid or expired"
+      }
+    },
+    {
+      "case": "future leaf with valid intermediate",
+      "expected": "rejected",
+      "time": "2024-01-01T00:00:00Z",
+      "original": {
+        "result": "accepted",
+        "returnedOriginalKey": true
+      },
+      "fixed": {
+        "result": "rejected",
+        "message": "INVALID KMS: Certificate Validation failed [8]: The certificate is either not yet valid or expired"
+      }
+    },
+    {
+      "case": "invalid leaf signature",
+      "expected": "rejected",
+      "time": "2030-01-01T00:00:00Z",
+      "original": {
+        "result": "accepted",
+        "returnedOriginalKey": true
+      },
+      "fixed": {
+        "result": "rejected",
+        "message": "INVALID KMS: Certificate Validation failed [-1]: No valid certificate paths found"
+      }
+    },
+    {
+      "case": "invalid intermediate signature",
+      "expected": "rejected",
+      "time": "2030-01-01T00:00:00Z",
+      "original": {
+        "result": "rejected",
+        "message": "INVALID KMS: Certificate Validation failed [-1]: No valid certificate paths found"
+      },
+      "fixed": {
+        "result": "rejected",
+        "message": "INVALID KMS: Certificate Validation failed [-1]: No valid certificate paths found"
+      }
+    },
+    {
+      "case": "missing intermediate",
+      "expected": "rejected",
+      "time": "2030-01-01T00:00:00Z",
+      "original": {
+        "result": "rejected",
+        "message": "INVALID KMS: Certificate Validation failed [-1]: No valid certificate paths found"
+      },
+      "fixed": {
+        "result": "rejected",
+        "message": "INVALID KMS: Certificate Validation failed [-1]: No valid certificate paths found"
+      }
+    },
+    {
+      "case": "untrusted complete chain",
+      "expected": "rejected",
+      "time": "2030-01-01T00:00:00Z",
+      "original": {
+        "result": "rejected",
+        "message": "INVALID KMS: Certificate Validation failed [97]: No valid certificate paths found"
+      },
+      "fixed": {
+        "result": "rejected",
+        "message": "INVALID KMS: Certificate Validation failed [97]: No valid certificate paths found"
+      }
+    },
+    {
+      "case": "invalid leaf before unrelated trusted certificate",
+      "expected": "rejected",
+      "time": "2030-01-01T00:00:00Z",
+      "original": {
+        "result": "accepted",
+        "returnedOriginalKey": true
+      },
+      "fixed": {
+        "result": "rejected",
+        "message": "INVALID KMS: Certificate Validation failed [-1]: No valid certificate paths found"
+      }
+    },
+    {
+      "case": "duplicated root",
+      "expected": "accepted",
+      "time": "2030-01-01T00:00:00Z",
+      "original": {
+        "result": "accepted",
+        "returnedOriginalKey": true
+      },
+      "fixed": {
+        "result": "accepted",
+        "returnedOriginalKey": true
+      }
+    },
+    {
+      "case": "valid duplicated leaf",
+      "expected": "accepted",
+      "time": "2030-01-01T00:00:00Z",
+      "original": {
+        "result": "accepted",
+        "returnedOriginalKey": true
+      },
+      "fixed": {
+        "result": "accepted",
+        "returnedOriginalKey": true
+      }
+    },
+    {
+      "case": "valid leaf in trust store position 0",
+      "expected": "accepted",
+      "time": "2030-01-01T00:00:00Z",
+      "original": {
+        "result": "accepted",
+        "returnedOriginalKey": true
+      },
+      "fixed": {
+        "result": "accepted",
+        "returnedOriginalKey": true
+      }
+    },
+    {
+      "case": "valid leaf in trust store position 1",
+      "expected": "accepted",
+      "time": "2030-01-01T00:00:00Z",
+      "original": {
+        "result": "accepted",
+        "returnedOriginalKey": true
+      },
+      "fixed": {
+        "result": "accepted",
+        "returnedOriginalKey": true
+      }
+    },
+    {
+      "case": "expired duplicated leaf",
+      "expected": "rejected",
+      "time": "2036-01-01T00:00:00Z",
+      "original": {
+        "result": "accepted",
+        "returnedOriginalKey": true
+      },
+      "fixed": {
+        "result": "rejected",
+        "message": "INVALID KMS: Certificate Validation failed [8]: The certificate is either not yet valid or expired"
+      }
+    },
+    {
+      "case": "expired leaf in trust store position 0",
+      "expected": "rejected",
+      "time": "2036-01-01T00:00:00Z",
+      "original": {
+        "result": "accepted",
+        "returnedOriginalKey": true
+      },
+      "fixed": {
+        "result": "rejected",
+        "message": "INVALID KMS: Certificate Validation failed [8]: The certificate is either not yet valid or expired"
+      }
+    },
+    {
+      "case": "expired leaf in trust store position 1",
+      "expected": "rejected",
+      "time": "2036-01-01T00:00:00Z",
+      "original": {
+        "result": "accepted",
+        "returnedOriginalKey": true
+      },
+      "fixed": {
+        "result": "rejected",
+        "message": "INVALID KMS: Certificate Validation failed [8]: The certificate is either not yet valid or expired"
+      }
+    },
+    {
+      "case": "future duplicated leaf",
+      "expected": "rejected",
+      "time": "2024-01-01T00:00:00Z",
+      "original": {
+        "result": "accepted",
+        "returnedOriginalKey": true
+      },
+      "fixed": {
+        "result": "rejected",
+        "message": "INVALID KMS: Certificate Validation failed [8]: The certificate is either not yet valid or expired"
+      }
+    },
+    {
+      "case": "future leaf in trust store position 0",
+      "expected": "rejected",
+      "time": "2024-01-01T00:00:00Z",
+      "original": {
+        "result": "accepted",
+        "returnedOriginalKey": true
+      },
+      "fixed": {
+        "result": "rejected",
+        "message": "INVALID KMS: Certificate Validation failed [8]: The certificate is either not yet valid or expired"
+      }
+    },
+    {
+      "case": "future leaf in trust store position 1",
+      "expected": "rejected",
+      "time": "2024-01-01T00:00:00Z",
+      "original": {
+        "result": "accepted",
+        "returnedOriginalKey": true
+      },
+      "fixed": {
+        "result": "rejected",
+        "message": "INVALID KMS: Certificate Validation failed [8]: The certificate is either not yet valid or expired"
+      }
+    },
+    {
+      "case": "invalid leaf followed by valid duplicate TBS",
+      "expected": "rejected",
+      "time": "2030-01-01T00:00:00Z",
+      "original": {
+        "result": "accepted",
+        "returnedOriginalKey": true
+      },
+      "fixed": {
+        "result": "rejected",
+        "message": "INVALID KMS: Certificate Validation failed [-1]: No valid certificate paths found"
+      }
+    },
+    {
+      "case": "valid leaf followed by invalid duplicate TBS",
+      "expected": "accepted",
+      "time": "2030-01-01T00:00:00Z",
+      "original": {
+        "result": "accepted",
+        "returnedOriginalKey": true
+      },
+      "fixed": {
+        "result": "accepted",
+        "returnedOriginalKey": true
+      }
+    },
+    {
+      "case": "invalid leaf matching trusted TBS",
+      "expected": "rejected",
+      "time": "2030-01-01T00:00:00Z",
+      "original": {
+        "result": "accepted",
+        "returnedOriginalKey": true
+      },
+      "fixed": {
+        "result": "rejected",
+        "message": "INVALID KMS: Certificate Validation failed [-1]: No valid certificate paths found"
+      }
+    },
+    {
+      "case": "valid leaf matching invalid trusted TBS",
+      "expected": "accepted",
+      "time": "2030-01-01T00:00:00Z",
+      "original": {
+        "result": "accepted",
+        "returnedOriginalKey": true
+      },
+      "fixed": {
+        "result": "accepted",
+        "returnedOriginalKey": true
+      }
+    },
+    {
+      "case": "missing intermediate with leaf in trust store",
+      "expected": "rejected",
+      "time": "2030-01-01T00:00:00Z",
+      "original": {
+        "result": "accepted",
+        "returnedOriginalKey": true
+      },
+      "fixed": {
+        "result": "rejected",
+        "message": "INVALID KMS: Certificate Validation failed [-1]: No valid certificate paths found"
+      }
+    },
+    {
+      "case": "non-CA leaf as the only trust anchor",
+      "expected": "rejected",
+      "time": "2030-01-01T00:00:00Z",
+      "original": {
+        "result": "rejected",
+        "message": "INVALID KMS: Certificate Validation failed [-1]: No valid certificate paths found"
+      },
+      "fixed": {
+        "result": "rejected",
+        "message": "INVALID KMS: Certificate Validation failed [-1]: No valid certificate paths found"
+      }
+    },
+    {
+      "case": "explicitly trusted self-issued CA after an unrelated root",
+      "expected": "accepted",
+      "time": "2030-01-01T00:00:00Z",
+      "original": {
+        "result": "accepted",
+        "returnedOriginalKey": true
+      },
+      "fixed": {
+        "result": "accepted",
+        "returnedOriginalKey": true
+      }
+    },
+    {
+      "case": "valid explicitly trusted self-issued CA with extra certificates",
+      "expected": "accepted",
+      "time": "2030-01-01T00:00:00Z",
+      "original": {
+        "result": "accepted",
+        "returnedOriginalKey": true
+      },
+      "fixed": {
+        "result": "accepted",
+        "returnedOriginalKey": true
+      }
+    },
+    {
+      "case": "expired explicitly trusted self-issued CA with extra certificates",
+      "expected": "rejected",
+      "time": "2041-01-01T00:00:00Z",
+      "original": {
+        "result": "rejected",
+        "message": "INVALID KMS: Certificate Validation failed [8]: The certificate is either not yet valid or expired"
+      },
+      "fixed": {
+        "result": "rejected",
+        "message": "INVALID KMS: Certificate Validation failed [8]: The certificate is either not yet valid or expired"
+      }
+    },
+    {
+      "case": "future explicitly trusted self-issued CA with extra certificates",
+      "expected": "rejected",
+      "time": "2019-01-01T00:00:00Z",
+      "original": {
+        "result": "rejected",
+        "message": "INVALID KMS: Certificate Validation failed [8]: The certificate is either not yet valid or expired"
+      },
+      "fixed": {
+        "result": "rejected",
+        "message": "INVALID KMS: Certificate Validation failed [8]: The certificate is either not yet valid or expired"
+      }
+    },
+    {
+      "case": "untrusted self-issued CA",
+      "expected": "rejected",
+      "time": "2030-01-01T00:00:00Z",
+      "original": {
+        "result": "accepted",
+        "returnedOriginalKey": true
+      },
+      "fixed": {
+        "result": "rejected",
+        "message": "INVALID KMS: Certificate Validation failed [97]: No valid certificate paths found"
+      }
+    },
+    {
+      "case": "invalid self-issued leaf signature matching trusted TBS",
+      "expected": "rejected",
+      "time": "2030-01-01T00:00:00Z",
+      "original": {
+        "result": "accepted",
+        "returnedOriginalKey": true
+      },
+      "fixed": {
+        "result": "rejected",
+        "message": "INVALID KMS: Certificate Validation failed [-1]: No valid certificate paths found"
+      }
+    }
+  ],
+  "reference": [
+    {
+      "case": "valid",
+      "result": "accepted",
+      "executable": "/usr/bin/openssl",
+      "args": [
+        "verify",
+        "-attime",
+        "1893456000",
+        "-CAfile",
+        "/private/tmp/sdk-leaf-research-2026-10-29/final-reference/root.pem",
+        "-untrusted",
+        "/private/tmp/sdk-leaf-research-2026-10-29/final-reference/intermediate.pem",
+        "/private/tmp/sdk-leaf-research-2026-10-29/final-reference/leaf.pem"
+      ],
+      "output": "/private/tmp/sdk-leaf-research-2026-10-29/final-reference/leaf.pem: OK"
+    },
+    {
+      "case": "expired leaf",
+      "result": "rejected",
+      "executable": "/usr/bin/openssl",
+      "args": [
+        "verify",
+        "-attime",
+        "2082758400",
+        "-CAfile",
+        "/private/tmp/sdk-leaf-research-2026-10-29/final-reference/root.pem",
+        "-untrusted",
+        "/private/tmp/sdk-leaf-research-2026-10-29/final-reference/intermediate.pem",
+        "/private/tmp/sdk-leaf-research-2026-10-29/final-reference/leaf.pem"
+      ],
+      "exitCode": 2,
+      "output": "CN = kms.diagnostics.invalid\nerror 10 at 0 depth lookup:certificate has expired\n/private/tmp/sdk-leaf-research-2026-10-29/final-reference/leaf.pem: verification failed: 10 (certificate has expired)"
+    },
+    {
+      "case": "future leaf",
+      "result": "rejected",
+      "executable": "/usr/bin/openssl",
+      "args": [
+        "verify",
+        "-attime",
+        "1704067200",
+        "-CAfile",
+        "/private/tmp/sdk-leaf-research-2026-10-29/final-reference/root.pem",
+        "-untrusted",
+        "/private/tmp/sdk-leaf-research-2026-10-29/final-reference/intermediate.pem",
+        "/private/tmp/sdk-leaf-research-2026-10-29/final-reference/leaf.pem"
+      ],
+      "exitCode": 2,
+      "output": "CN = kms.diagnostics.invalid\nerror 9 at 0 depth lookup:certificate is not yet valid\n/private/tmp/sdk-leaf-research-2026-10-29/final-reference/leaf.pem: verification failed: 9 (certificate is not yet valid)"
+    },
+    {
+      "case": "invalid leaf signature",
+      "result": "rejected",
+      "executable": "/usr/bin/openssl",
+      "args": [
+        "verify",
+        "-attime",
+        "1893456000",
+        "-CAfile",
+        "/private/tmp/sdk-leaf-research-2026-10-29/final-reference/root.pem",
+        "-untrusted",
+        "/private/tmp/sdk-leaf-research-2026-10-29/final-reference/intermediate.pem",
+        "/private/tmp/sdk-leaf-research-2026-10-29/final-reference/bad-leaf.pem"
+      ],
+      "exitCode": 2,
+      "output": "CN = kms.diagnostics.invalid\nerror 7 at 0 depth lookup:certificate signature failure\n/private/tmp/sdk-leaf-research-2026-10-29/final-reference/bad-leaf.pem: verification failed: 7 (certificate signature failure)\n8237924224:error:04FFF06A:rsa routines:CRYPTO_internal:block type is not 01:/AppleInternal/Library/BuildRoots/4~CV2UugDeYlyMIkNxnlicVCIBNSFk1-DuRW77Gyo/Library/Caches/com.apple.xbs/TemporaryDirectory.G5skni/Sources/libressl/libressl-3.3/crypto/rsa/rsa_pk1.c:103:\n8237924224:error:04FFF072:rsa routines:CRYPTO_internal:padding check failed:/AppleInternal/Library/BuildRoots/4~CV2UugDeYlyMIkNxnlicVCIBNSFk1-DuRW77Gyo/Library/Caches/com.apple.xbs/TemporaryDirectory.G5skni/Sources/libressl/libressl-3.3/crypto/apple/rsa/rsa_eay.c:276:\n8237924224:error:0DFFF006:asn1 encoding routines:CRYPTO_internal:EVP lib:/AppleInternal/Library/BuildRoots/4~CV2UugDeYlyMIkNxnlicVCIBNSFk1-DuRW77Gyo/Library/Caches/com.apple.xbs/TemporaryDirectory.G5skni/Sources/libressl/libressl-3.3/crypto/asn1/a_verify.c:155:"
+    }
+  ]
+}

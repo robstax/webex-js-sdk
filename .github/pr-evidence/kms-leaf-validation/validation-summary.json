@@ -1,0 +1,36 @@
+{
+  "base": "77dbe986d6afe944525aa9dbdd3428294469aa77",
+  "files": [
+    "packages/@webex/internal-plugin-encryption/README.md",
+    "packages/@webex/internal-plugin-encryption/src/kms-certificate-validation.js",
+    "packages/@webex/internal-plugin-encryption/test/fixtures/kms-certificate.js",
+    "packages/@webex/internal-plugin-encryption/test/fixtures/certificate-diagnostics.json",
+    "packages/@webex/internal-plugin-encryption/test/lib/kms-certificate-chain.js",
+    "packages/@webex/internal-plugin-encryption/test/unit/spec/kms-certificate-chain.ts",
+    "packages/@webex/internal-plugin-encryption/test/integration/spec/kms-certificate-chain.js"
+  ],
+  "sourceSHA256": "d83a65b4dd96216a490b80372466604ceb036bf43754afbcc0bdf37d67c39d07",
+  "chainCases": 33,
+  "focusedUnitTests": 56,
+  "originalValidatorTests": 20,
+  "originalKMSTests": 58,
+  "chromeTests": 56,
+  "firefoxTests": 56,
+  "detectedMutations": 15,
+  "lintErrors": 0,
+  "lintWarnings": 4,
+  "formatCheck": "passed",
+  "privateKeyFields": false,
+  "platform": "macOS 27.0.1",
+  "node": "22.14.0",
+  "browsers": {
+    "chrome": "Chrome Headless 156.0.0.0",
+    "firefox": "Firefox 158.0"
+  },
+  "scopeExcluded": [
+    "package.json ordering change",
+    "generated Webex Connect samples"
+  ],
+  "publication": "Evidence branch for the user-requested SDK leaf-validation pull request.",
+  "sourceCommit": "b04018929b7e4b8d94cd4b1e49ad6d7b4976310e"
+}

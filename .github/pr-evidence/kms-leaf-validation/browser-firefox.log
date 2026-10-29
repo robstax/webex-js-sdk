@@ -1,0 +1,110 @@
+[33m29 10 2026 18:09:31.411:WARN [proxy]: [39mproxy "http://localhost:9136" normalized to "http://localhost:9136/"
+Tests run started
+
+START:
+Browserslist: browsers data (caniuse-lite) is 7 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+Browserslist: browsers data (caniuse-lite) is 7 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+[32m29 10 2026 18:09:36.450:INFO [framework.browserify]: [39mbundle built
+[32m29 10 2026 18:09:36.465:INFO [karma-server]: [39mKarma v6.4.4 server started at http://localhost:9137/
+[32m29 10 2026 18:09:36.465:INFO [launcher]: [39mLaunching browsers FirefoxHeadless_H264 with concurrency 4
+[32m29 10 2026 18:09:36.474:INFO [launcher]: [39mStarting browser FirefoxHeadless
+[32m29 10 2026 18:09:38.523:INFO [Firefox 158.0 (Mac OS 10.15)]: [39mConnected on socket F4nSksovDgqh9yIhAAAB with id 58705976
+  KMS identity certificate chain
+    ✔ accepts one certificate without changing the public input
+    ✔ accepts leaf and intermediate without changing the public input
+    ✔ accepts included root without changing the public input
+    ✔ accepts extra trusted certificate without changing the public input
+    ✔ rejects expired leaf with valid intermediate without changing the public input
+    ✔ rejects future leaf with valid intermediate without changing the public input
+    ✔ rejects invalid leaf signature without changing the public input
+    ✔ rejects invalid intermediate signature without changing the public input
+    ✔ rejects missing intermediate without changing the public input
+    ✔ rejects untrusted complete chain without changing the public input
+    ✔ rejects invalid leaf before unrelated trusted certificate without changing the public input
+    ✔ accepts duplicated root without changing the public input
+    ✔ accepts valid duplicated leaf without changing the public input
+    ✔ accepts valid leaf in trust store position 0 without changing the public input
+    ✔ accepts valid leaf in trust store position 1 without changing the public input
+    ✔ rejects expired duplicated leaf without changing the public input
+    ✔ rejects expired leaf in trust store position 0 without changing the public input
+    ✔ rejects expired leaf in trust store position 1 without changing the public input
+    ✔ rejects future duplicated leaf without changing the public input
+    ✔ rejects future leaf in trust store position 0 without changing the public input
+    ✔ rejects future leaf in trust store position 1 without changing the public input
+    ✔ rejects invalid leaf followed by valid duplicate TBS without changing the public input
+    ✔ accepts valid leaf followed by invalid duplicate TBS without changing the public input
+    ✔ rejects invalid leaf matching trusted TBS without changing the public input
+    ✔ accepts valid leaf matching invalid trusted TBS without changing the public input
+    ✔ rejects missing intermediate with leaf in trust store without changing the public input
+    ✔ rejects non-CA leaf as the only trust anchor without changing the public input
+    ✔ accepts explicitly trusted self-issued CA after an unrelated root without changing the public input
+    ✔ accepts valid explicitly trusted self-issued CA with extra certificates without changing the public input
+    ✔ rejects expired explicitly trusted self-issued CA with extra certificates without changing the public input
+    ✔ rejects future explicitly trusted self-issued CA with extra certificates without changing the public input
+    ✔ rejects untrusted self-issued CA without changing the public input
+    ✔ rejects invalid self-issued leaf signature matching trusted TBS without changing the public input
+    ✔ retains the key type check when signature validation is disabled
+    ✔ retains the key URI check when signature validation is disabled
+    ✔ retains the key protocol check when signature validation is disabled
+    ✔ retains the missing certificates check when signature validation is disabled
+    ✔ retains the empty certificates check when signature validation is disabled
+    ✔ retains the non-string certificate check when signature validation is disabled
+    ✔ retains the hostname check when signature validation is disabled
+    ✔ retains the public exponent check when signature validation is disabled
+    ✔ retains the modulus check when signature validation is disabled
+    ✔ retains the explicit signature bypass for expired leaf with valid intermediate
+    ✔ retains the explicit signature bypass for future leaf with valid intermediate
+    ✔ retains the explicit signature bypass for invalid leaf signature
+    ✔ rejects a successful engine result with a different leaf
+    ✔ rejects a successful engine result with an empty path
+    ✔ rejects a successful engine result with no path
+    ✔ preserves an engine failure even when its path starts with the intended leaf
+    ✔ preserves enforced policy for a valid leaf
+WARN: 'kms: enforced certificate validation failed', Error: INVALID KMS: Certificate Validation failed [-1]: No valid certificate paths found
+_construct@http://localhost:9137/absolute/var/folders/lk/z_4qfrzj5dn11fvcp69q0zwh0000gn/T/e097132f8b6599902b64edb3d61368c2.browserify.js?6b32e4d8ba613dc363f28d7cb488f6d665bb0a1c:142:61
+Wrapper@http://localhost:9137/absolute/var/folders/lk/z_4qfrzj5dn11fvcp69q0zwh0000gn/T/e097132f8b6599902b64edb3d61368c2.browserify.js?6b32e4d8ba613dc363f28d7cb488f6d665bb0a1c:683:14
+_callSuper@http://localhost:9137/absolute/var/folders/lk/z_4qfrzj5dn11fvcp69q0zwh0000gn/T/e097132f8b6599902b64edb3d61368c2.browserify.js?6b32e4d8ba613dc363f28d7cb488f6d665bb0a1c:186722:122
+KMSError@http://localhost:9137/absolute/var/folders/lk/z_4qfrzj5dn11fvcp69q0zwh0000gn/T/e097132f8b6599902b64edb3d61368c2.browserify.js?6b32e4d8ba613dc363f28d7cb488f6d665bb0a1c:186754:13
+throwError@http://localhost:9137/absolute/var/folders/lk/z_4qfrzj5dn11fvcp69q0zwh0000gn/T/e097132f8b6599902b64edb3d61368c2.browserify.js?6b32e4d8ba613dc363f28d7cb488f6d665bb0a1c:186762:9
+require<[1259]</validateCertificatesSignature/<@http://localhost:9137/absolute/var/folders/lk/z_4qfrzj5dn11fvcp69q0zwh0000gn/T/e097132f8b6599902b64edb3d61368c2.browserify.js?6b32e4d8ba613dc363f28d7cb488f6d665bb0a1c:186953:17
+
+    ✔ preserves enforced policy for an invalid leaf
+    ✔ preserves explicit report-only policy for a valid leaf
+WARN: 'kms: report-only certificate validation failed', Error: INVALID KMS: Certificate Validation failed [-1]: No valid certificate paths found
+_construct@http://localhost:9137/absolute/var/folders/lk/z_4qfrzj5dn11fvcp69q0zwh0000gn/T/e097132f8b6599902b64edb3d61368c2.browserify.js?6b32e4d8ba613dc363f28d7cb488f6d665bb0a1c:142:61
+Wrapper@http://localhost:9137/absolute/var/folders/lk/z_4qfrzj5dn11fvcp69q0zwh0000gn/T/e097132f8b6599902b64edb3d61368c2.browserify.js?6b32e4d8ba613dc363f28d7cb488f6d665bb0a1c:683:14
+_callSuper@http://localhost:9137/absolute/var/folders/lk/z_4qfrzj5dn11fvcp69q0zwh0000gn/T/e097132f8b6599902b64edb3d61368c2.browserify.js?6b32e4d8ba613dc363f28d7cb488f6d665bb0a1c:186722:122
+KMSError@http://localhost:9137/absolute/var/folders/lk/z_4qfrzj5dn11fvcp69q0zwh0000gn/T/e097132f8b6599902b64edb3d61368c2.browserify.js?6b32e4d8ba613dc363f28d7cb488f6d665bb0a1c:186754:13
+throwError@http://localhost:9137/absolute/var/folders/lk/z_4qfrzj5dn11fvcp69q0zwh0000gn/T/e097132f8b6599902b64edb3d61368c2.browserify.js?6b32e4d8ba613dc363f28d7cb488f6d665bb0a1c:186762:9
+require<[1259]</validateCertificatesSignature/<@http://localhost:9137/absolute/var/folders/lk/z_4qfrzj5dn11fvcp69q0zwh0000gn/T/e097132f8b6599902b64edb3d61368c2.browserify.js?6b32e4d8ba613dc363f28d7cb488f6d665bb0a1c:186953:17
+
+    ✔ preserves explicit report-only policy for an invalid leaf
+    ✔ preserves background report-only policy for a valid leaf
+WARN: 'kms: report-only certificate validation failed', Error: INVALID KMS: Certificate Validation failed [-1]: No valid certificate paths found
+_construct@http://localhost:9137/absolute/var/folders/lk/z_4qfrzj5dn11fvcp69q0zwh0000gn/T/e097132f8b6599902b64edb3d61368c2.browserify.js?6b32e4d8ba613dc363f28d7cb488f6d665bb0a1c:142:61
+Wrapper@http://localhost:9137/absolute/var/folders/lk/z_4qfrzj5dn11fvcp69q0zwh0000gn/T/e097132f8b6599902b64edb3d61368c2.browserify.js?6b32e4d8ba613dc363f28d7cb488f6d665bb0a1c:683:14
+_callSuper@http://localhost:9137/absolute/var/folders/lk/z_4qfrzj5dn11fvcp69q0zwh0000gn/T/e097132f8b6599902b64edb3d61368c2.browserify.js?6b32e4d8ba613dc363f28d7cb488f6d665bb0a1c:186722:122
+KMSError@http://localhost:9137/absolute/var/folders/lk/z_4qfrzj5dn11fvcp69q0zwh0000gn/T/e097132f8b6599902b64edb3d61368c2.browserify.js?6b32e4d8ba613dc363f28d7cb488f6d665bb0a1c:186754:13
+throwError@http://localhost:9137/absolute/var/folders/lk/z_4qfrzj5dn11fvcp69q0zwh0000gn/T/e097132f8b6599902b64edb3d61368c2.browserify.js?6b32e4d8ba613dc363f28d7cb488f6d665bb0a1c:186762:9
+require<[1259]</validateCertificatesSignature/<@http://localhost:9137/absolute/var/folders/lk/z_4qfrzj5dn11fvcp69q0zwh0000gn/T/e097132f8b6599902b64edb3d61368c2.browserify.js?6b32e4d8ba613dc363f28d7cb488f6d665bb0a1c:186953:17
+
+    ✔ preserves background report-only policy for an invalid leaf
+WARN: 'kms: report-only certificate validation failed', Error: INVALID KMS: Certificate Validation failed [-1]: No valid certificate paths found
+_construct@http://localhost:9137/absolute/var/folders/lk/z_4qfrzj5dn11fvcp69q0zwh0000gn/T/e097132f8b6599902b64edb3d61368c2.browserify.js?6b32e4d8ba613dc363f28d7cb488f6d665bb0a1c:142:61
+Wrapper@http://localhost:9137/absolute/var/folders/lk/z_4qfrzj5dn11fvcp69q0zwh0000gn/T/e097132f8b6599902b64edb3d61368c2.browserify.js?6b32e4d8ba613dc363f28d7cb488f6d665bb0a1c:683:14
+_callSuper@http://localhost:9137/absolute/var/folders/lk/z_4qfrzj5dn11fvcp69q0zwh0000gn/T/e097132f8b6599902b64edb3d61368c2.browserify.js?6b32e4d8ba613dc363f28d7cb488f6d665bb0a1c:186722:122
+KMSError@http://localhost:9137/absolute/var/folders/lk/z_4qfrzj5dn11fvcp69q0zwh0000gn/T/e097132f8b6599902b64edb3d61368c2.browserify.js?6b32e4d8ba613dc363f28d7cb488f6d665bb0a1c:186754:13
+throwError@http://localhost:9137/absolute/var/folders/lk/z_4qfrzj5dn11fvcp69q0zwh0000gn/T/e097132f8b6599902b64edb3d61368c2.browserify.js?6b32e4d8ba613dc363f28d7cb488f6d665bb0a1c:186762:9
+require<[1259]</validateCertificatesSignature/<@http://localhost:9137/absolute/var/folders/lk/z_4qfrzj5dn11fvcp69q0zwh0000gn/T/e097132f8b6599902b64edb3d61368c2.browserify.js?6b32e4d8ba613dc363f28d7cb488f6d665bb0a1c:186953:17
+
+    ✔ returns the key before the background check completes and reports its later failure
+Test run complete
+
+Finished in 0.11 secs / 0.124 secs @ 18:09:38 GMT-0400 (Eastern Daylight Time)
+
+SUMMARY:
+✔ 56 tests completed

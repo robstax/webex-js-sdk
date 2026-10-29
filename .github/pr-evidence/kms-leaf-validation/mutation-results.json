@@ -1,0 +1,207 @@
+{
+  "sourceSHA256": "d83a65b4dd96216a490b80372466604ceb036bf43754afbcc0bdf37d67c39d07",
+  "restored": true,
+  "results": [
+    {
+      "mutation": "select-last-input-certificate",
+      "exitCode": 1,
+      "expectedFailingCase": "rejects expired leaf with valid intermediate",
+      "failedTests": [
+        "rejects expired leaf with valid intermediate without changing the public input",
+        "rejects future leaf with valid intermediate without changing the public input",
+        "rejects invalid leaf signature without changing the public input",
+        "rejects invalid leaf before unrelated trusted certificate without changing the public input",
+        "rejects expired leaf in trust store position 0 without changing the public input",
+        "rejects expired leaf in trust store position 1 without changing the public input",
+        "rejects future leaf in trust store position 0 without changing the public input",
+        "rejects future leaf in trust store position 1 without changing the public input",
+        "rejects invalid leaf followed by valid duplicate TBS without changing the public input",
+        "accepts valid leaf followed by invalid duplicate TBS without changing the public input",
+        "rejects invalid leaf matching trusted TBS without changing the public input",
+        "rejects untrusted self-issued CA without changing the public input",
+        "rejects invalid self-issued leaf signature matching trusted TBS without changing the public input"
+      ],
+      "caughtForExpectedReason": true
+    },
+    {
+      "mutation": "place-leaf-first",
+      "exitCode": 1,
+      "expectedFailingCase": "accepts leaf and intermediate",
+      "failedTests": [
+        "accepts leaf and intermediate without changing the public input",
+        "accepts included root without changing the public input",
+        "accepts extra trusted certificate without changing the public input",
+        "accepts duplicated root without changing the public input",
+        "accepts valid duplicated leaf without changing the public input",
+        "accepts valid leaf in trust store position 0 without changing the public input",
+        "accepts valid leaf in trust store position 1 without changing the public input",
+        "accepts valid leaf followed by invalid duplicate TBS without changing the public input",
+        "accepts valid leaf matching invalid trusted TBS without changing the public input"
+      ],
+      "caughtForExpectedReason": true
+    },
+    {
+      "mutation": "omit-supplied-duplicate-filter",
+      "exitCode": 1,
+      "expectedFailingCase": "accepts valid duplicated leaf",
+      "failedTests": [
+        "accepts valid duplicated leaf without changing the public input",
+        "accepts valid leaf followed by invalid duplicate TBS without changing the public input"
+      ],
+      "caughtForExpectedReason": true
+    },
+    {
+      "mutation": "omit-trust-store-duplicate-filter",
+      "exitCode": 1,
+      "expectedFailingCase": "accepts valid leaf in trust store position 0",
+      "failedTests": [
+        "accepts valid leaf in trust store position 0 without changing the public input",
+        "accepts valid leaf in trust store position 1 without changing the public input",
+        "accepts valid leaf matching invalid trusted TBS without changing the public input"
+      ],
+      "caughtForExpectedReason": true
+    },
+    {
+      "mutation": "compare-full-certificate-for-duplicate-filter",
+      "exitCode": 1,
+      "expectedFailingCase": "accepts valid leaf followed by invalid duplicate TBS",
+      "failedTests": [
+        "accepts valid leaf followed by invalid duplicate TBS without changing the public input",
+        "accepts valid leaf matching invalid trusted TBS without changing the public input"
+      ],
+      "caughtForExpectedReason": true
+    },
+    {
+      "mutation": "compare-issuer-TBS-instead-of-leaf",
+      "exitCode": 1,
+      "expectedFailingCase": "accepts leaf and intermediate",
+      "failedTests": [
+        "accepts one certificate without changing the public input",
+        "accepts leaf and intermediate without changing the public input",
+        "accepts included root without changing the public input",
+        "accepts extra trusted certificate without changing the public input",
+        "rejects missing intermediate without changing the public input",
+        "accepts duplicated root without changing the public input",
+        "accepts valid duplicated leaf without changing the public input",
+        "accepts valid leaf in trust store position 0 without changing the public input",
+        "accepts valid leaf in trust store position 1 without changing the public input",
+        "accepts valid leaf followed by invalid duplicate TBS without changing the public input",
+        "accepts valid leaf matching invalid trusted TBS without changing the public input",
+        "rejects missing intermediate with leaf in trust store without changing the public input"
+      ],
+      "caughtForExpectedReason": true
+    },
+    {
+      "mutation": "remove-configured-trust",
+      "exitCode": 1,
+      "expectedFailingCase": "accepts leaf and intermediate",
+      "failedTests": [
+        "accepts one certificate without changing the public input",
+        "accepts leaf and intermediate without changing the public input",
+        "accepts included root without changing the public input",
+        "accepts extra trusted certificate without changing the public input",
+        "accepts duplicated root without changing the public input",
+        "accepts valid duplicated leaf without changing the public input",
+        "accepts valid leaf in trust store position 0 without changing the public input",
+        "accepts valid leaf in trust store position 1 without changing the public input",
+        "accepts valid leaf followed by invalid duplicate TBS without changing the public input",
+        "accepts valid leaf matching invalid trusted TBS without changing the public input",
+        "accepts explicitly trusted self-issued CA after an unrelated root without changing the public input",
+        "accepts valid explicitly trusted self-issued CA with extra certificates without changing the public input"
+      ],
+      "caughtForExpectedReason": true
+    },
+    {
+      "mutation": "disable-self-issued-anchor-handling",
+      "exitCode": 1,
+      "expectedFailingCase": "accepts valid explicitly trusted self-issued CA with extra certificates",
+      "failedTests": [
+        "accepts explicitly trusted self-issued CA after an unrelated root without changing the public input",
+        "accepts valid explicitly trusted self-issued CA with extra certificates without changing the public input"
+      ],
+      "caughtForExpectedReason": true
+    },
+    {
+      "mutation": "allow-self-issued-handling-for-issued-leaf",
+      "exitCode": 1,
+      "expectedFailingCase": "accepts valid leaf in trust store position 0",
+      "failedTests": [
+        "accepts valid leaf in trust store position 0 without changing the public input",
+        "accepts valid leaf in trust store position 1 without changing the public input"
+      ],
+      "caughtForExpectedReason": true
+    },
+    {
+      "mutation": "trust-self-issued-TBS-without-signature-match",
+      "exitCode": 1,
+      "expectedFailingCase": "rejects invalid self-issued leaf signature matching trusted TBS",
+      "failedTests": [
+        "rejects invalid self-issued leaf signature matching trusted TBS without changing the public input"
+      ],
+      "caughtForExpectedReason": true
+    },
+    {
+      "mutation": "keep-extra-trust-with-self-issued-leaf",
+      "exitCode": 1,
+      "expectedFailingCase": "accepts valid explicitly trusted self-issued CA with extra certificates",
+      "failedTests": [
+        "accepts explicitly trusted self-issued CA after an unrelated root without changing the public input",
+        "accepts valid explicitly trusted self-issued CA with extra certificates without changing the public input"
+      ],
+      "caughtForExpectedReason": true
+    },
+    {
+      "mutation": "keep-extra-inputs-with-self-issued-leaf",
+      "exitCode": 1,
+      "expectedFailingCase": "accepts valid explicitly trusted self-issued CA with extra certificates",
+      "failedTests": [
+        "accepts explicitly trusted self-issued CA after an unrelated root without changing the public input",
+        "accepts valid explicitly trusted self-issued CA with extra certificates without changing the public input"
+      ],
+      "caughtForExpectedReason": true
+    },
+    {
+      "mutation": "ignore-engine-rejection",
+      "exitCode": 1,
+      "expectedFailingCase": "preserves an engine failure even when its path starts with the intended leaf",
+      "failedTests": [
+        "preserves an engine failure even when its path starts with the intended leaf"
+      ],
+      "caughtForExpectedReason": true
+    },
+    {
+      "mutation": "omit-selected-leaf-guard",
+      "exitCode": 1,
+      "expectedFailingCase": "rejects a successful engine result with a different leaf",
+      "failedTests": [
+        "rejects a successful engine result with a different leaf",
+        "rejects a successful engine result with an empty path",
+        "rejects a successful engine result with no path"
+      ],
+      "caughtForExpectedReason": true
+    },
+    {
+      "mutation": "invert-selected-leaf-guard",
+      "exitCode": 1,
+      "expectedFailingCase": "accepts leaf and intermediate",
+      "failedTests": [
+        "accepts one certificate without changing the public input",
+        "accepts leaf and intermediate without changing the public input",
+        "accepts included root without changing the public input",
+        "accepts extra trusted certificate without changing the public input",
+        "accepts duplicated root without changing the public input",
+        "accepts valid duplicated leaf without changing the public input",
+        "accepts valid leaf in trust store position 0 without changing the public input",
+        "accepts valid leaf in trust store position 1 without changing the public input",
+        "accepts valid leaf followed by invalid duplicate TBS without changing the public input",
+        "accepts valid leaf matching invalid trusted TBS without changing the public input",
+        "accepts explicitly trusted self-issued CA after an unrelated root without changing the public input",
+        "accepts valid explicitly trusted self-issued CA with extra certificates without changing the public input",
+        "rejects a successful engine result with a different leaf",
+        "rejects a successful engine result with an empty path",
+        "rejects a successful engine result with no path"
+      ],
+      "caughtForExpectedReason": true
+    }
+  ]
+}
