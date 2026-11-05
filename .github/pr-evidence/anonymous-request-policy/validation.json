@@ -1,0 +1,93 @@
+{
+  "sdkCommit": "354d1a3ed7db39c3f6b699423f98996796ba6630",
+  "baseBranch": "next",
+  "baseCommit": "4ccd77e55c80e5930a4f6cb16e8413e7eb10fb65",
+  "node": "22.14.0",
+  "yarn": "3.4.1",
+  "builtCoreDistSha256": "66fde44fe1523b963975f9eb91496ae1907bb1df7d2663d01735c45da96e28a5",
+  "checks": {
+    "coreUnit": {
+      "command": "yarn workspace @webex/webex-core test:unit",
+      "exitCode": 0,
+      "suitesPassed": 36,
+      "testsPassed": 926,
+      "testsSkipped": 15,
+      "newTestsPassed": 70,
+      "note": "Existing background catalog tests emit late-log warnings."
+    },
+    "build": {
+      "command": "yarn workspace @webex/webex-core build:src",
+      "exitCode": 0
+    },
+    "style": {
+      "command": "yarn workspace @webex/webex-core test:style",
+      "exitCode": 0,
+      "errors": 0,
+      "existingWarnings": 65
+    },
+    "format": {
+      "exitCode": 0,
+      "scope": "All changed JS/TS files"
+    },
+    "commitHooks": {
+      "exitCode": 0,
+      "checks": [
+        "srcdist",
+        "lint-staged",
+        "commitlint"
+      ],
+      "skipped": false
+    },
+    "sdkIntegration": {
+      "command": "yarn workspace @webex/webex-core test:integration",
+      "exitCode": 1,
+      "testsPassed": 8,
+      "setupFailures": 6,
+      "reason": "WEBEX_CLIENT_ID must be defined; the SDK checkout has no live test-user configuration."
+    },
+    "realBrowser": {
+      "policy": "passed",
+      "fedramp": "passed on unchanged repeat; first attempt had a later lobby timeout",
+      "dnssecOrg": "passed",
+      "evidence": "browser.json"
+    }
+  },
+  "acceptanceEvidence": {
+    "approved anonymous admission": [
+      "70 focused unit tests",
+      "browser.json standalonePolicy and target POST HTTP200"
+    ],
+    "no credential trust or Authorization": [
+      "browser.json sharedDomainAllowed/targetDomainAllowed false and POST authorizationPresent false",
+      "unit catalog overlap, inherited and case-variant header tests"
+    ],
+    "no token lookup or refresh": [
+      "unit Auth checks, no lookup assertions, anonymous401 test"
+    ],
+    "unknown and unsafe targets": [
+      "browser.json invalidNetworkAttempts empty and policyProbe blocked",
+      "unit unsafe scheme/port/userinfo/parser and config cases"
+    ],
+    "default compatibility": [
+      "926 core unit tests",
+      "unit empty-rule custom chain test"
+    ],
+    "replay and final destinations": [
+      "unit header/locus/appapi redirect cases and final host rewrite",
+      "browser.json actual404100 replay"
+    ],
+    "custom pipelines and runtime rules": [
+      "unit request/prepareFetchOptions custom maps and per-request arrays",
+      "unit setConfig add/replace/clear and invalid-update atomicity"
+    ],
+    "transport input and signer controls": [
+      "unit native URL spoof, legacy object, baseUrl slash forms, defaults and signer suppression"
+    ]
+  },
+  "review": "Independent read-only execution-path review found no remaining material issue after native URL, custom-chain, runtime-update and baseUrl hardening.",
+  "limits": [
+    "Native HTTP redirects inside XHR bypass SDK interceptors.",
+    "Browser checks ran in Chrome on macOS.",
+    "Six SDK live integration setup hooks lack WEBEX_CLIENT_ID."
+  ]
+}
