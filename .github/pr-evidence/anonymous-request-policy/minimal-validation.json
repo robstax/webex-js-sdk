@@ -35,8 +35,9 @@
     },
     "browser": {
       "policy": "passed",
-      "fedramp": "later lobby timeout",
-      "dnssecOrg": "later lobby timeout",
+      "localhostFedramp": "passed",
+      "localhostDnssecOrg": "passed",
+      "deployedGuestControls": "Later lobby timeouts retained separately",
       "capture": "minimal-browser.json"
     },
     "sdkLiveIntegration": {
