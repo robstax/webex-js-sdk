@@ -1,0 +1,45 @@
+{
+  "sdkCommit": "5b4958ccbe9a84e264098ed3e1c86dc969c11d4d",
+  "change": "Use regular webex.request and its original interceptor chain. No new interceptor, request method, request wrapper, or core changes.",
+  "existingControls": [
+    "addAuthHeader:false",
+    "shouldRefreshAccessToken:false"
+  ],
+  "remainingAmendment": "Existing Catalog/Auth interceptors classify the request-only domain fallback; the shared helper clears inherited credentials and sets existing controls.",
+  "unit": {
+    "command": "yarn workspace @webex/webex-core test:unit",
+    "exitCode": 0,
+    "suitesPassed": 36,
+    "testsPassed": 894,
+    "testsSkipped": 15,
+    "newTestsPassed": 38
+  },
+  "build": {
+    "exitCode": 0
+  },
+  "style": {
+    "exitCode": 0,
+    "errors": 0,
+    "existingWarnings": 65
+  },
+  "format": {
+    "exitCode": 0
+  },
+  "commitHooks": {
+    "exitCode": 0,
+    "skipped": false
+  },
+  "regressionEvidence": [
+    "Same interceptor chain with domain list configured or empty.",
+    "Defaults and transport signers cannot recreate Authorization because false options already exist.",
+    "SDK header, locus and appapi redirect replay use ordinary webex.request and strip inherited headers.",
+    "Already-anonymous requests remain anonymous through downstream host mapping.",
+    "Unknown redirects remain blocked and anonymous401 does not refresh."
+  ],
+  "browserEvidence": {
+    "testedCommit": "a078d016c7bbde7d74767297ad5724db745029b2",
+    "file": "minimal-browser.json",
+    "rerunForInterceptorRemoval": false,
+    "note": "Both localhost source/guest variants passed before removal of redundant final cleanup. Domain matching/header suppression code is unchanged; current complete unit suite validates the original chain."
+  }
+}
