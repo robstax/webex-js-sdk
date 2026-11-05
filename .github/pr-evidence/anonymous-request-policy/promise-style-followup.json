@@ -1,0 +1,49 @@
+{
+  "sdkCommit": "1055b5fe1b5bcf133dff0cfbbb09c6cb28124eac",
+  "previousCommit": "354d1a3ed7db39c3f6b699423f98996796ba6630",
+  "change": "Preserve the SDK Promise style. Remove five added production async declarations. Use explicit Promise resolves for anonymous early returns and reject wrapper validation errors through Promise.reject.",
+  "unit": {
+    "command": "yarn workspace @webex/webex-core test:unit",
+    "exitCode": 0,
+    "suitesPassed": 36,
+    "testsPassed": 928,
+    "testsSkipped": 15,
+    "anonymousPolicyTestsPassed": 72
+  },
+  "build": {
+    "command": "yarn workspace @webex/webex-core build:src",
+    "exitCode": 0
+  },
+  "style": {
+    "command": "yarn workspace @webex/webex-core test:style",
+    "exitCode": 0,
+    "errors": 0,
+    "existingWarnings": 65
+  },
+  "format": {
+    "exitCode": 0
+  },
+  "commitHooks": {
+    "exitCode": 0,
+    "skipped": false
+  },
+  "syntax": {
+    "newProductionAsyncDeclarations": 0,
+    "generatedFiles": [
+      "interceptors/auth.js",
+      "interceptors/catalog-url.js",
+      "webex-core.js"
+    ],
+    "allParseAsEs5": true,
+    "asyncToGeneratorImports": 0
+  },
+  "positive": "Existing anonymous interceptor tests use .then and assert complete returned values.",
+  "negative": "New request and prepareFetchOptions tests confirm policy errors reject through the returned Promise before transport or token retrieval.",
+  "browserEvidence": {
+    "file": "browser.json",
+    "testedCommit": "354d1a3ed7db39c3f6b699423f98996796ba6630",
+    "rerunForStyleCorrection": false,
+    "reason": "This correction preserves the policy logic and verifies Promise behavior with the full core unit suite."
+  },
+  "integrationLimit": "Prior SDK live integration run: 8 passed, 6 setup hooks missing WEBEX_CLIENT_ID. This tier was not repeated for the Promise-style correction."
+}
