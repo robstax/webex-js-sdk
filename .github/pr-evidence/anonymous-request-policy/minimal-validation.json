@@ -1,0 +1,86 @@
+{
+  "sdkCommit": "a078d016c7bbde7d74767297ad5724db745029b2",
+  "baseBranch": "next",
+  "contract": "Domain-only anonymous admission fallback. Existing catalog and ordinary allowedDomains trust retain authentication precedence.",
+  "matching": "Existing matchAllowedDomain and normalizeAllowedDomains remain unchanged.",
+  "helperLines": 67,
+  "coreIntegrationAddedLines": 6,
+  "newProductionAsyncDeclarations": 0,
+  "builtCoreDistSha256": "44198a4bc349dfdedd8f1db5652535f942ac8a577cd07a928f30fefad0c922d2",
+  "checks": {
+    "unit": {
+      "command": "yarn workspace @webex/webex-core test:unit",
+      "exitCode": 0,
+      "suitesPassed": 36,
+      "testsPassed": 893,
+      "testsSkipped": 15,
+      "newTestsPassed": 37
+    },
+    "build": {
+      "command": "yarn workspace @webex/webex-core build:src",
+      "exitCode": 0
+    },
+    "style": {
+      "command": "yarn workspace @webex/webex-core test:style",
+      "exitCode": 0,
+      "errors": 0,
+      "existingWarnings": 65
+    },
+    "format": {
+      "exitCode": 0
+    },
+    "commitHooks": {
+      "exitCode": 0,
+      "skipped": false
+    },
+    "browser": {
+      "policy": "passed",
+      "fedramp": "later lobby timeout",
+      "dnssecOrg": "later lobby timeout",
+      "capture": "minimal-browser.json"
+    },
+    "sdkLiveIntegration": {
+      "rerun": false,
+      "previousPassed": 8,
+      "previousSetupFailures": 6,
+      "reason": "SDK checkout lacks WEBEX_CLIENT_ID."
+    }
+  },
+  "acceptanceEvidence": {
+    "domain admission without credential trust": [
+      "shared matcher unit cases",
+      "browser policy HTTP200 with no auth and credential allowlist false"
+    ],
+    "existing authentication remains intact": [
+      "catalog and ordinary domain overlap unit cases",
+      "browser home POST Authorization true"
+    ],
+    "inherited and transport auth suppressed": [
+      "case-variant and source-header isolation tests",
+      "default signers and late rewrite tests",
+      "browser redirected POST Authorization false"
+    ],
+    "unknown and lookalike URLs blocked": [
+      "shared parser/domain negative unit cases",
+      "browser probes rejected with zero network attempts"
+    ],
+    "SDK redirects and refresh": [
+      "header/locus/appapi replay unit cases",
+      "anonymous401 no-refresh test",
+      "browser404100 replay"
+    ],
+    "minimal change and compatibility": [
+      "default empty chain unit test",
+      "893 core tests",
+      "original request and setConfig implementation restored",
+      "no path, scheme, port, URL-object or baseUrl policy added"
+    ]
+  },
+  "review": "Independent read-only review found no material issue against the existing allowedDomains baseline and the fallback contract.",
+  "limits": [
+    "Existing per-request interceptor replacement remains application-controlled.",
+    "Native HTTP redirects inside XHR bypass SDK interceptors.",
+    "Browser checks ran in Chrome on macOS.",
+    "SDK live integration setup lacks credentials."
+  ]
+}

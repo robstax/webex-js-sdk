@@ -1,0 +1,289 @@
+{
+  "sdkCommit": "a078d016c7bbde7d74767297ad5724db745029b2",
+  "webClientCommit": "7e6562765c35984e13d4800f5e0f080e380d99de",
+  "baseUrl": "https://localhost.webex.com",
+  "port": 443,
+  "browser": "Chrome on macOS",
+  "configuredDomains": [
+    "webex.com"
+  ],
+  "catalogValidationEnabled": true,
+  "transportOrPrototypeOverrides": false,
+  "policy": {
+    "validationEnabled": true,
+    "requestOnlyPolicyConfigured": true,
+    "fedramp": true,
+    "sharedDomainAllowed": false,
+    "positive": {
+      "status": 200,
+      "fedramp": false,
+      "hasMeetingInfo": true
+    },
+    "wireRequests": [
+      {
+        "method": "POST",
+        "authorizationPresent": false
+      },
+      {
+        "method": "OPTIONS",
+        "authorizationPresent": null
+      }
+    ],
+    "negative": [
+      {
+        "hostname": "blocked.invalid",
+        "blocked": true
+      },
+      {
+        "hostname": "webex.com.invalid",
+        "blocked": true
+      }
+    ],
+    "invalidNetworkAttempts": []
+  },
+  "fedrampAttempts": [
+    {
+      "mode": "baseline",
+      "fedramp": true,
+      "dnssecOrg": false,
+      "responses": [
+        {
+          "method": "POST",
+          "hostname": "nebulafa.webex.com",
+          "pathname": "/wbxappapi/v1/meetingInfo",
+          "status": 404,
+          "code": 404100,
+          "redirectHost": "webclientacmeco.webex.com"
+        },
+        {
+          "method": "POST",
+          "hostname": "webclientacmeco.webex.com",
+          "pathname": "/wbxappapi/v1/meetingInfo",
+          "status": 200,
+          "fedramp": false
+        }
+      ],
+      "createdPopupCount": 1,
+      "reachedLobby": false,
+      "completedFlow": false,
+      "authorizationPrecedenceVerified": true,
+      "invalidNetworkAttempts": [],
+      "policyProbe": [
+        {
+          "hostname": "blocked.invalid",
+          "blocked": true
+        },
+        {
+          "hostname": "webex.com.invalid",
+          "blocked": true
+        }
+      ],
+      "sdkState": {
+        "validateCatalogUrls": true,
+        "requestOnlyPolicyConfigured": true,
+        "targetDomainAllowed": false
+      },
+      "wireRequests": [
+        {
+          "method": "OPTIONS",
+          "hostname": "nebulafa.webex.com",
+          "pathname": "/wbxappapi/v1/meetingInfo",
+          "authorizationPresent": false,
+          "status": 200
+        },
+        {
+          "method": "POST",
+          "hostname": "nebulafa.webex.com",
+          "pathname": "/wbxappapi/v1/meetingInfo",
+          "authorizationPresent": true,
+          "status": 404
+        },
+        {
+          "method": "OPTIONS",
+          "hostname": "webclientacmeco.webex.com",
+          "pathname": "/wbxappapi/v1/meetingInfo",
+          "authorizationPresent": false,
+          "status": 200
+        },
+        {
+          "method": "POST",
+          "hostname": "webclientacmeco.webex.com",
+          "pathname": "/wbxappapi/v1/meetingInfo",
+          "authorizationPresent": false,
+          "status": 200
+        }
+      ],
+      "laterFailure": "10-second wait for call_lobby_content timed out after discovery and popup succeeded."
+    },
+    {
+      "mode": "baseline",
+      "fedramp": true,
+      "dnssecOrg": false,
+      "responses": [
+        {
+          "method": "POST",
+          "hostname": "nebulafa.webex.com",
+          "pathname": "/wbxappapi/v1/meetingInfo",
+          "status": 404,
+          "code": 404100,
+          "redirectHost": "webclientacmeco.webex.com"
+        },
+        {
+          "method": "POST",
+          "hostname": "webclientacmeco.webex.com",
+          "pathname": "/wbxappapi/v1/meetingInfo",
+          "status": 200,
+          "fedramp": false
+        }
+      ],
+      "createdPopupCount": 1,
+      "reachedLobby": false,
+      "completedFlow": false,
+      "authorizationPrecedenceVerified": true,
+      "invalidNetworkAttempts": [],
+      "policyProbe": [
+        {
+          "hostname": "blocked.invalid",
+          "blocked": true
+        },
+        {
+          "hostname": "webex.com.invalid",
+          "blocked": true
+        }
+      ],
+      "sdkState": {
+        "validateCatalogUrls": true,
+        "requestOnlyPolicyConfigured": true,
+        "targetDomainAllowed": false
+      },
+      "remoteRuntimeBeforeJoin": {
+        "origin": "https://web.webex.com",
+        "sdkVersion": "3.13.0-next.1",
+        "fedramp": false,
+        "validateCatalogUrls": false,
+        "allowedWithoutAuthHeader": null,
+        "contextMeetingInfoNetwork": {
+          "responseCount": 2,
+          "responses": [
+            {
+              "hostname": "nebulafa.webex.com",
+              "pathname": "/wbxappapi/v1/meetingInfo",
+              "status": 404
+            },
+            {
+              "hostname": "webclientacmeco.webex.com",
+              "pathname": "/wbxappapi/v1/meetingInfo",
+              "status": 200
+            }
+          ]
+        }
+      },
+      "wireRequests": [
+        {
+          "method": "OPTIONS",
+          "hostname": "nebulafa.webex.com",
+          "pathname": "/wbxappapi/v1/meetingInfo",
+          "authorizationPresent": false,
+          "status": 200
+        },
+        {
+          "method": "POST",
+          "hostname": "nebulafa.webex.com",
+          "pathname": "/wbxappapi/v1/meetingInfo",
+          "authorizationPresent": true,
+          "status": 404
+        },
+        {
+          "method": "OPTIONS",
+          "hostname": "webclientacmeco.webex.com",
+          "pathname": "/wbxappapi/v1/meetingInfo",
+          "authorizationPresent": false,
+          "status": 200
+        },
+        {
+          "method": "POST",
+          "hostname": "webclientacmeco.webex.com",
+          "pathname": "/wbxappapi/v1/meetingInfo",
+          "authorizationPresent": false,
+          "status": 200
+        }
+      ],
+      "laterFailure": "10-second wait for call_lobby_content timed out after discovery and popup succeeded."
+    }
+  ],
+  "dnssecOrg": {
+    "mode": "baseline",
+    "fedramp": true,
+    "dnssecOrg": true,
+    "responses": [
+      {
+        "method": "POST",
+        "hostname": "nebulafa.webex.com",
+        "pathname": "/wbxappapi/v1/meetingInfo",
+        "status": 404,
+        "code": 404100,
+        "redirectHost": "webclientacmeco.webex.com"
+      },
+      {
+        "method": "POST",
+        "hostname": "webclientacmeco.webex.com",
+        "pathname": "/wbxappapi/v1/meetingInfo",
+        "status": 200,
+        "fedramp": false
+      }
+    ],
+    "createdPopupCount": 1,
+    "reachedLobby": false,
+    "completedFlow": false,
+    "authorizationPrecedenceVerified": true,
+    "invalidNetworkAttempts": [],
+    "policyProbe": [
+      {
+        "hostname": "blocked.invalid",
+        "blocked": true
+      },
+      {
+        "hostname": "webex.com.invalid",
+        "blocked": true
+      }
+    ],
+    "sdkState": {
+      "validateCatalogUrls": true,
+      "requestOnlyPolicyConfigured": true,
+      "targetDomainAllowed": false
+    },
+    "wireRequests": [
+      {
+        "method": "OPTIONS",
+        "hostname": "nebulafa.webex.com",
+        "pathname": "/wbxappapi/v1/meetingInfo",
+        "authorizationPresent": false,
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "hostname": "nebulafa.webex.com",
+        "pathname": "/wbxappapi/v1/meetingInfo",
+        "authorizationPresent": true,
+        "status": 404
+      },
+      {
+        "method": "OPTIONS",
+        "hostname": "webclientacmeco.webex.com",
+        "pathname": "/wbxappapi/v1/meetingInfo",
+        "authorizationPresent": false,
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "hostname": "webclientacmeco.webex.com",
+        "pathname": "/wbxappapi/v1/meetingInfo",
+        "authorizationPresent": false,
+        "status": 200
+      }
+    ],
+    "laterFailure": "10-second wait for call_lobby_content timed out after discovery and popup succeeded."
+  },
+  "scope": "DNSSEC selects the original CI organization variant; it does not establish DNSSEC discovery transport.",
+  "privacy": "Authorization presence only. No token values, raw client logs, request IDs, user names, or meeting IDs."
+}
