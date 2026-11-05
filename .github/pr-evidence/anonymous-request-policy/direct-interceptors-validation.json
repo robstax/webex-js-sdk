@@ -1,0 +1,42 @@
+{
+  "sdkCommit": "8ec7f44b01fd538bb4eeba5cf8cee5bd60aec647",
+  "productionChanges": [
+    "Existing config key",
+    "Existing CatalogUrlInterceptor admission check",
+    "Existing AuthInterceptor credential handling"
+  ],
+  "newProductionFiles": 0,
+  "newInterceptors": 0,
+  "newRequestApis": 0,
+  "coreRequestAndChain": "Identical to base",
+  "policyModule": "Deleted",
+  "unit": {
+    "exitCode": 0,
+    "suitesPassed": 36,
+    "testsPassed": 894,
+    "testsSkipped": 15,
+    "newTestsPassed": 38
+  },
+  "build": {
+    "exitCode": 0
+  },
+  "style": {
+    "exitCode": 0,
+    "errors": 0,
+    "existingWarnings": 65
+  },
+  "format": {
+    "exitCode": 0
+  },
+  "commitHooks": {
+    "exitCode": 0,
+    "skipped": false
+  },
+  "coverage": "Tests exercise existing Auth/Catalog methods and ordinary webex.request directly, including inherited headers, defaults, redirects, unchanged trusted auth and anonymous401.",
+  "browserEvidence": {
+    "testedCommit": "a078d016c7bbde7d74767297ad5724db745029b2",
+    "file": "minimal-browser.json",
+    "repeatedForInlineCleanup": false,
+    "note": "The full localhost flows predate removal of redundant module/interceptor scaffolding. Current complete core suite validates equivalent direct checks and standard no-auth options."
+  }
+}
